@@ -2,7 +2,6 @@ import streamlit as st
 from openai import OpenAI
 import time
 from create_update_assistant import create_or_update_assistant
-from assistant_instructions import instructions
 import os
 from dotenv import load_dotenv
 
@@ -33,7 +32,7 @@ def initialize_chat():
         st.session_state["thread_id"] = thread.id
 
     if "messages" not in st.session_state:
-        st.session_state["messages"] = [{"role": "system", "content": instructions}]
+        st.session_state["messages"] = [{"role": "system", "content": "Hola!, ¿Cómo puedo ayudarte el día de hoy?"}]
 
     for msg in st.session_state["messages"]:
         role = "Usuario" if msg["role"] == "user" else "Asistente"
@@ -87,4 +86,5 @@ def extraer_año(response):
     if match:
         return int(match.group(0))
     return None
+
 

@@ -60,4 +60,3 @@ instructions = """
 
 Estas instrucciones guiarán al asistente en cada paso de la interacción con el usuario, asegurando que se proporcionen datos relevantes y recomendaciones útiles para la gestión de energía del edificio.
 """
-

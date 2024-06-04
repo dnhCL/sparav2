@@ -4,12 +4,17 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import json
 import os
+from assistant_instructions import instructions
 
 # Inicializar la sesión del chat
 initialize_chat()
 
 # Título de la aplicación
 st.title("Asistente de Energía para Edificios")
+
+# Mostrar las instrucciones en una sección separada
+with st.expander("Instrucciones del Asistente de Energía para Edificios"):
+    st.markdown(instructions)
 
 # Cargar datos de los edificios
 def load_json(file_path):
@@ -33,7 +38,7 @@ if st.button("Enviar"):
 # Función para visualizar datos de consumo de energía en un gráfico
 def plot_energy_usage(building_id, year):
     data = st.session_state["meterings_data"].get(str(building_id))
-    if data and year in data:
+    if data and str(year) in data:
         df = pd.DataFrame(data[str(year)])
         plt.figure(figsize=(10, 5))
         plt.plot(df["month"], df["electricity_use_property"], label='Electricidad Propiedad')
@@ -55,7 +60,7 @@ def generate_report(building_id, year):
     report_content.append(f"Consumo Energético Promedio: {building_info['EnergyClassKwhM2']} kWh/m²\n")
 
     data = st.session_state["meterings_data"].get(str(building_id))
-    if data and year in data:
+    if data and str(year) in data:
         df = pd.DataFrame(data[str(year)])
         avg_consumption = df["electricity_use_property"].mean()
         report_content.append(f"Consumo Promedio de Electricidad de la Propiedad en {year}: {avg_consumption:.2f} kWh\n")
@@ -84,3 +89,4 @@ if st.session_state.get("selected_building_id") and st.session_state.get("select
     # Generar y mostrar el reporte
     report_path = generate_report(building_id, year)
     st.markdown(f"[Descargar Reporte]({report_path})")
+
