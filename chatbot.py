@@ -2,6 +2,7 @@ import streamlit as st
 from openai import OpenAI
 import time
 from create_update_assistant import create_or_update_assistant
+from assistant_instructions import instructions
 import os
 from dotenv import load_dotenv
 
@@ -32,7 +33,7 @@ def initialize_chat():
         st.session_state["thread_id"] = thread.id
 
     if "messages" not in st.session_state:
-        st.session_state["messages"] = [{"role": "system", "content": "Hola!, ¿Cómo puedo ayudarte el día de hoy?"}]
+        st.session_state["messages"] = [{"role": "system", "content": instructions}]
 
     for msg in st.session_state["messages"]:
         role = "Usuario" if msg["role"] == "user" else "Asistente"
@@ -66,10 +67,24 @@ def handle_user_input(prompt):
         if building_id:
             st.session_state["selected_building_id"] = building_id
 
+    # Si el asistente identifica un año
+    if "año" in response.lower():
+        year = extraer_año(response)
+        if year:
+            st.session_state["selected_year"] = year
+
 def extraer_id_edificio(response):
     # Implementar lógica para extraer el building_id de la respuesta
-    # Esto es un ejemplo y debería adaptarse a la estructura real de la respuesta
     for building in st.session_state["buildings"]:
         if building["buildingName"] in response:
             return building["building_id"]
     return None
+
+def extraer_año(response):
+    # Implementar lógica para extraer el año de la respuesta
+    import re
+    match = re.search(r'\b(20\d{2})\b', response)
+    if match:
+        return int(match.group(0))
+    return None
+

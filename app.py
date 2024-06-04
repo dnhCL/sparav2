@@ -31,22 +31,22 @@ if st.button("Enviar"):
     handle_user_input(user_input)
 
 # Función para visualizar datos de consumo de energía en un gráfico
-def plot_energy_usage(building_id):
+def plot_energy_usage(building_id, year):
     data = st.session_state["meterings_data"].get(str(building_id))
-    if data:
-        df = pd.DataFrame(data["2022"])
+    if data and year in data:
+        df = pd.DataFrame(data[str(year)])
         plt.figure(figsize=(10, 5))
         plt.plot(df["month"], df["electricity_use_property"], label='Electricidad Propiedad')
         plt.plot(df["month"], df["electricity_use_charging_station"], label='Estación de Carga')
         plt.plot(df["month"], df["electricity_use_water_heating_and_tap_hot_water"], label='Agua Caliente')
         plt.xlabel('Mes')
         plt.ylabel('Consumo de Electricidad (kWh)')
-        plt.title('Consumo de Electricidad por Mes')
+        plt.title(f'Consumo de Electricidad por Mes en {year}')
         plt.legend()
         st.pyplot(plt)
 
 # Función para generar un reporte
-def generate_report(building_id):
+def generate_report(building_id, year):
     report_content = []
     building_info = next(b for b in st.session_state["id_data"] if b["building_id"] == building_id)
     report_content.append(f"Reporte de Energía para el Edificio: {building_info['buildingName']}\n")
@@ -55,12 +55,12 @@ def generate_report(building_id):
     report_content.append(f"Consumo Energético Promedio: {building_info['EnergyClassKwhM2']} kWh/m²\n")
 
     data = st.session_state["meterings_data"].get(str(building_id))
-    if data:
-        df = pd.DataFrame(data["2022"])
+    if data and year in data:
+        df = pd.DataFrame(data[str(year)])
         avg_consumption = df["electricity_use_property"].mean()
-        report_content.append(f"Consumo Promedio de Electricidad de la Propiedad: {avg_consumption:.2f} kWh\n")
+        report_content.append(f"Consumo Promedio de Electricidad de la Propiedad en {year}: {avg_consumption:.2f} kWh\n")
 
-    report_path = os.path.join("data", f"reporte_edificio_{building_id}.txt")
+    report_path = os.path.join("data", f"reporte_edificio_{building_id}_{year}.txt")
     with open(report_path, 'w', encoding='utf-8') as report_file:
         report_file.writelines(report_content)
     
@@ -72,14 +72,15 @@ for msg in st.session_state["messages"]:
     role = "Usuario" if msg["role"] == "user" else "Asistente"
     st.write(f"{role}: {msg['content']}")
 
-# Verificar si el asistente ha identificado el edificio
-if st.session_state.get("selected_building_id"):
+# Verificar si el asistente ha identificado el edificio y el año
+if st.session_state.get("selected_building_id") and st.session_state.get("selected_year"):
     building_id = st.session_state["selected_building_id"]
+    year = st.session_state["selected_year"]
     building_info = next(b for b in st.session_state["id_data"] if b["building_id"] == building_id)
 
-    st.subheader(f"Consumo de Energía para {building_info['buildingName']}")
-    plot_energy_usage(building_id)
+    st.subheader(f"Consumo de Energía para {building_info['buildingName']} en {year}")
+    plot_energy_usage(building_id, year)
 
     # Generar y mostrar el reporte
-    report_path = generate_report(building_id)
+    report_path = generate_report(building_id, year)
     st.markdown(f"[Descargar Reporte]({report_path})")
