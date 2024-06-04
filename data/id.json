@@ -1,0 +1,123 @@
+[
+  {
+    "building_id": 1,
+    "numberOfApartments": 110,
+    "numberOfTenants": 8,
+    "netAreaResidential": 8755,
+    "buildingName": "Brf Sjöstaden 2",
+    "netAreaNonResidential": 8755,
+    "netAreaHeated": 15350,
+    "declaredEnergyClass": "B",
+    "EnergyClassKwhM2": 53
+  },
+  {
+    "building_id": 2,
+    "numberOfApartments": 5,
+    "numberOfTenants": 10,
+    "netAreaResidential": 500,
+    "buildingName": "Arams test building",
+    "netAreaNonResidential": 2000,
+    "netAreaHeated": 100,
+    "declaredEnergyClass": "C",
+    "EnergyClassKwhM2": 0
+  },
+  {
+    "building_id": 3,
+    "numberOfApartments": 90,
+    "numberOfTenants": 1,
+    "netAreaResidential": 9999,
+    "buildingName": "Brf Sjöportalen",
+    "netAreaNonResidential": 7369,
+    "netAreaHeated": 9273,
+    "declaredEnergyClass": "F",
+    "EnergyClassKwhM2": 155
+  },
+  {
+    "building_id": 4,
+    "numberOfApartments": 50,
+    "numberOfTenants": 0,
+    "netAreaResidential": 3319,
+    "buildingName": "Brf Strandkanten",
+    "netAreaNonResidential": 0,
+    "netAreaHeated": 3941,
+    "declaredEnergyClass": "F",
+    "EnergyClassKwhM2": 73
+  },
+  {
+    "building_id": 5,
+    "numberOfApartments": 50,
+    "numberOfTenants": 35,
+    "netAreaResidential": 9999,
+    "buildingName": "Wrong building",
+    "netAreaNonResidential": 1000,
+    "netAreaHeated": 9000,
+    "declaredEnergyClass": "B",
+    "EnergyClassKwhM2": 108
+  },
+  {
+    "building_id": 6,
+    "numberOfApartments": 94,
+    "numberOfTenants": 3,
+    "netAreaResidential": 9999,
+    "buildingName": "Brf Sjöstadsesplanaden 1",
+    "netAreaNonResidential": 7426,
+    "netAreaHeated": 8667,
+    "declaredEnergyClass": "C",
+    "EnergyClassKwhM2": 73
+  },
+  {
+    "building_id": 7,
+    "numberOfApartments": 37,
+    "numberOfTenants": 0,
+    "netAreaResidential": 9999,
+    "buildingName": "Brf Sundet2",
+    "netAreaNonResidential": 3650,
+    "netAreaHeated": 5594,
+    "declaredEnergyClass": "D",
+    "EnergyClassKwhM2": 108
+  },
+  {
+    "building_id": 8,
+    "numberOfApartments": 226,
+    "numberOfTenants": 10,
+    "netAreaResidential": 9999,
+    "buildingName": "The Village",
+    "netAreaNonResidential": 17854,
+    "netAreaHeated": 25889,
+    "declaredEnergyClass": "C",
+    "EnergyClassKwhM2": 67
+  },
+  {
+    "building_id": 9,
+    "numberOfApartments": 114,
+    "numberOfTenants": 4,
+    "netAreaResidential": 12397,
+    "buildingName": "Brf Holmen",
+    "netAreaNonResidential": 517,
+    "netAreaHeated": 12914,
+    "declaredEnergyClass": "D",
+    "EnergyClassKwhM2": 115
+  },
+  {
+    "building_id": 10,
+    "numberOfApartments": 100,
+    "numberOfTenants": 5,
+    "netAreaResidential": 9999,
+    "buildingName": "Brf Sjöstadspiren",
+    "netAreaNonResidential": 400,
+    "netAreaHeated": 11412,
+    "declaredEnergyClass": "B",
+    "EnergyClassKwhM2": 100
+  },
+  {
+    "building_id": 11,
+    "numberOfApartments": 82,
+    "numberOfTenants": 0,
+    "netAreaResidential": 99999,
+    "buildingName": "Brf Hammarby Kaj",
+    "netAreaNonResidential": 1950,
+    "netAreaHeated": 9279,
+    "declaredEnergyClass": "E",
+    "EnergyClassKwhM2": 127
+  }
+]

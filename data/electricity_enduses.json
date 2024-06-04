@@ -1,0 +1,112 @@
+[
+  {
+    "id": 1,
+    "electricity_used_for_property": "t",
+    "electricity_used_for_property_heating": "t",
+    "electricity_used_for_taphotwater": "t",
+    "electricity_used_for_apartments": "t",
+    "electricity_used_for_tenants": "f",
+    "building_id": 1,
+    "electricity_used_for_charging_station": "t"
+  },
+  {
+    "id": 2,
+    "electricity_used_for_property": "t",
+    "electricity_used_for_property_heating": "t",
+    "electricity_used_for_taphotwater": "t",
+    "electricity_used_for_apartments": "t",
+    "electricity_used_for_tenants": "f",
+    "building_id": 2,
+    "electricity_used_for_charging_station": "f"
+  },
+  {
+    "id": 3,
+    "electricity_used_for_property": "t",
+    "electricity_used_for_property_heating": "f",
+    "electricity_used_for_taphotwater": "f",
+    "electricity_used_for_apartments": "f",
+    "electricity_used_for_tenants": "t",
+    "building_id": 3,
+    "electricity_used_for_charging_station": "f"
+  },
+  {
+    "id": 4,
+    "electricity_used_for_property": "t",
+    "electricity_used_for_property_heating": "t",
+    "electricity_used_for_taphotwater": "t",
+    "electricity_used_for_apartments": "f",
+    "electricity_used_for_tenants": "f",
+    "building_id": 4,
+    "electricity_used_for_charging_station": "t"
+  },
+  {
+    "id": 5,
+    "electricity_used_for_property": "t",
+    "electricity_used_for_property_heating": "f",
+    "electricity_used_for_taphotwater": "f",
+    "electricity_used_for_apartments": "f",
+    "electricity_used_for_tenants": "f",
+    "building_id": 5,
+    "electricity_used_for_charging_station": "f"
+  },
+  {
+    "id": 6,
+    "electricity_used_for_property": "t",
+    "electricity_used_for_property_heating": "f",
+    "electricity_used_for_taphotwater": "f",
+    "electricity_used_for_apartments": "f",
+    "electricity_used_for_tenants": "f",
+    "building_id": 6,
+    "electricity_used_for_charging_station": "f"
+  },
+  {
+    "id": 7,
+    "electricity_used_for_property": "t",
+    "electricity_used_for_property_heating": "f",
+    "electricity_used_for_taphotwater": "f",
+    "electricity_used_for_apartments": "f",
+    "electricity_used_for_tenants": "f",
+    "building_id": 7,
+    "electricity_used_for_charging_station": "f"
+  },
+  {
+    "id": 8,
+    "electricity_used_for_property": "t",
+    "electricity_used_for_property_heating": "f",
+    "electricity_used_for_taphotwater": "f",
+    "electricity_used_for_apartments": "f",
+    "electricity_used_for_tenants": "f",
+    "building_id": 8,
+    "electricity_used_for_charging_station": "f"
+  },
+  {
+    "id": 9,
+    "electricity_used_for_property": "t",
+    "electricity_used_for_property_heating": "f",
+    "electricity_used_for_taphotwater": "f",
+    "electricity_used_for_apartments": "f",
+    "electricity_used_for_tenants": "f",
+    "building_id": 9,
+    "electricity_used_for_charging_station": "t"
+  },
+  {
+    "id": 10,
+    "electricity_used_for_property": "t",
+    "electricity_used_for_property_heating": "f",
+    "electricity_used_for_taphotwater": "f",
+    "electricity_used_for_apartments": "f",
+    "electricity_used_for_tenants": "f",
+    "building_id": 10,
+    "electricity_used_for_charging_station": "f"
+  },
+  {
+    "id": 11,
+    "electricity_used_for_property": "t",
+    "electricity_used_for_property_heating": "f",
+    "electricity_used_for_taphotwater": "f",
+    "electricity_used_for_apartments": "t",
+    "electricity_used_for_tenants": "f",
+    "building_id": 11,
+    "electricity_used_for_charging_station": "f"
+  }
+]
