@@ -34,9 +34,10 @@ def initialize_chat():
     if "messages" not in st.session_state:
         st.session_state["messages"] = [{"role": "system", "content": "Hola!, ¿Cómo puedo ayudarte el día de hoy?"}]
 
-    for msg in st.session_state["messages"]:
-        role = "Usuario" if msg["role"] == "user" else "Asistente"
-        st.sidebar.write(f"{role}: {msg['content']}")
+    # No mostrar la conversación en la barra lateral
+    # for msg in st.session_state["messages"]:
+    #     role = "Usuario" if msg["role"] == "user" else "Asistente"
+    #     st.sidebar.write(f"{role}: {msg['content']}")
 
 def handle_user_input(prompt):
     if not prompt.strip():
@@ -44,14 +45,25 @@ def handle_user_input(prompt):
         return
 
     st.session_state.messages.append({"role": "user", "content": prompt})
-    st.sidebar.write(f"Usuario: {prompt}")
 
     try:
         client.beta.threads.messages.create(thread_id=st.session_state["thread_id"],
                                             role="user",
                                             content=prompt)
-        run = client.beta.threads.runs.create(thread_id=st.session_state["thread_id"],
-                                              assistant_id=assistant_id)
+
+        # Check if there is already an active run
+        active_run = None
+        try:
+            runs = client.beta.threads.runs.list(thread_id=st.session_state["thread_id"])
+            active_run = next((run for run in runs.data if run.status == 'active'), None)
+        except Exception as e:
+            st.error(f"Error al obtener las ejecuciones del hilo: {e}")
+
+        if active_run:
+            run = active_run
+        else:
+            run = client.beta.threads.runs.create(thread_id=st.session_state["thread_id"],
+                                                  assistant_id=assistant_id)
 
         while True:
             run_status = client.beta.threads.runs.retrieve(thread_id=st.session_state["thread_id"],
@@ -63,7 +75,6 @@ def handle_user_input(prompt):
         messages = client.beta.threads.messages.list(thread_id=st.session_state["thread_id"])
         response = messages.data[0].content[0].text.value
         st.session_state.messages.append({"role": "assistant", "content": response})
-        st.sidebar.write(f"Asistente: {response}")
 
         # Si el asistente identifica un edificio
         if "edificio" in response.lower():
@@ -93,6 +104,7 @@ def extraer_año(response):
     if match:
         return int(match.group(0))
     return None
+
 
 
 
