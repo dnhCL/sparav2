@@ -39,38 +39,45 @@ def initialize_chat():
         st.sidebar.write(f"{role}: {msg['content']}")
 
 def handle_user_input(prompt):
+    if not prompt.strip():
+        st.warning("Por favor, introduce un mensaje.")
+        return
+
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.sidebar.write(f"Usuario: {prompt}")
 
-    client.beta.threads.messages.create(thread_id=st.session_state["thread_id"],
-                                        role="user",
-                                        content=prompt)
-    run = client.beta.threads.runs.create(thread_id=st.session_state["thread_id"],
-                                          assistant_id=assistant_id)
+    try:
+        client.beta.threads.messages.create(thread_id=st.session_state["thread_id"],
+                                            role="user",
+                                            content=prompt)
+        run = client.beta.threads.runs.create(thread_id=st.session_state["thread_id"],
+                                              assistant_id=assistant_id)
 
-    while True:
-        run_status = client.beta.threads.runs.retrieve(thread_id=st.session_state["thread_id"],
-                                                       run_id=run.id)
-        if run_status.status == 'completed':
-            break
-        time.sleep(1)
+        while True:
+            run_status = client.beta.threads.runs.retrieve(thread_id=st.session_state["thread_id"],
+                                                           run_id=run.id)
+            if run_status.status == 'completed':
+                break
+            time.sleep(1)
 
-    messages = client.beta.threads.messages.list(thread_id=st.session_state["thread_id"])
-    response = messages.data[0].content[0].text.value
-    st.session_state.messages.append({"role": "assistant", "content": response})
-    st.sidebar.write(f"Asistente: {response}")
+        messages = client.beta.threads.messages.list(thread_id=st.session_state["thread_id"])
+        response = messages.data[0].content[0].text.value
+        st.session_state.messages.append({"role": "assistant", "content": response})
+        st.sidebar.write(f"Asistente: {response}")
 
-    # Si el asistente identifica un edificio
-    if "edificio" in response.lower():
-        building_id = extraer_id_edificio(response)
-        if building_id:
-            st.session_state["selected_building_id"] = building_id
+        # Si el asistente identifica un edificio
+        if "edificio" in response.lower():
+            building_id = extraer_id_edificio(response)
+            if building_id:
+                st.session_state["selected_building_id"] = building_id
 
-    # Si el asistente identifica un año
-    if "año" in response.lower():
-        year = extraer_año(response)
-        if year:
-            st.session_state["selected_year"] = year
+        # Si el asistente identifica un año
+        if "año" in response.lower():
+            year = extraer_año(response)
+            if year:
+                st.session_state["selected_year"] = year
+    except Exception as e:
+        st.error(f"Error al procesar el mensaje: {e}")
 
 def extraer_id_edificio(response):
     # Implementar lógica para extraer el building_id de la respuesta
@@ -86,5 +93,6 @@ def extraer_año(response):
     if match:
         return int(match.group(0))
     return None
+
 
 

@@ -23,19 +23,22 @@ st.session_state["hvac_systems_data"] = load_json("data/hvac_systems.json")
 st.session_state["id_data"] = load_json("data/id.json")
 st.session_state["buildings"] = st.session_state["id_data"]
 
-# Estilo de la aplicación para mantener la barra de entrada siempre en la parte inferior
+# Ocultar la barra lateral que muestra la conversación
 st.markdown("""
     <style>
+    .css-1y0tads {
+        display: none;
+    }
     .stTextInput {
         position: fixed;
         bottom: 3%;
         width: 70%;
-        margin-left: 15%;
+        left: 15%;
     }
     .stButton {
         position: fixed;
         bottom: 3%;
-        right: 15%;
+        left: 85%;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -104,3 +107,4 @@ if st.session_state.get("selected_building_id") and st.session_state.get("select
     # Generar y mostrar el reporte
     report_path = generate_report(building_id, year)
     st.markdown(f"[Descargar Reporte]({report_path})")
+
