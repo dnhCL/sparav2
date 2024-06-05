@@ -29,7 +29,7 @@ st.markdown("""
     .stTextInput {
         position: fixed;
         bottom: 0;
-        width: 100%;
+        width: 50%;
     }
     .stButton {
         position: fixed;
