@@ -32,8 +32,8 @@ st.markdown("""
     .stTextInput {
         position: fixed;
         bottom: 3%;
-        width: 70%;
-        left: 15%;
+        width: 40%;
+        left: 30%;
     }
     .stButton {
         position: fixed;
@@ -43,13 +43,22 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# Sección de entrada de usuario
-user_input = st.text_input("Escribe tu mensaje aquí:", key="input", label_visibility="collapsed")
-
-# Manejar la entrada del usuario
-if st.button("Enviar"):
+# Función para manejar la entrada del usuario y limpiar el campo de entrada
+def handle_input():
+    user_input = st.session_state.input
     handle_user_input(user_input)
-    st.session_state["input"] = ""  # Clear input field
+    st.session_state.input = ""  # Clear input field
+
+# Sección de entrada de usuario
+st.text_input("Escribe tu mensaje aquí:", key="input", label_visibility="collapsed", on_change=handle_input)
+
+# Mostrar mensajes del asistente en la interfaz principal
+st.subheader("Chat del Asistente")
+chat_container = st.container()
+with chat_container:
+    for msg in st.session_state["messages"]:
+        role = "Usuario" if msg["role"] == "user" else "Asistente"
+        st.markdown(f"**{role}:** {msg['content']}")
 
 # Función para visualizar datos de consumo de energía en un gráfico
 def plot_energy_usage(building_id, year):
@@ -87,14 +96,6 @@ def generate_report(building_id, year):
     
     return report_path
 
-# Mostrar mensajes del asistente en la interfaz principal
-st.subheader("Chat del Asistente")
-chat_container = st.container()
-with chat_container:
-    for msg in st.session_state["messages"]:
-        role = "Usuario" if msg["role"] == "user" else "Asistente"
-        st.markdown(f"**{role}:** {msg['content']}")
-
 # Verificar si el asistente ha identificado el edificio y el año
 if st.session_state.get("selected_building_id") and st.session_state.get("selected_year"):
     building_id = st.session_state["selected_building_id"]
@@ -107,4 +108,5 @@ if st.session_state.get("selected_building_id") and st.session_state.get("select
     # Generar y mostrar el reporte
     report_path = generate_report(building_id, year)
     st.markdown(f"[Descargar Reporte]({report_path})")
+
 
