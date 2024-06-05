@@ -55,8 +55,6 @@ def handle_input():
         handle_user_input(user_input)
         st.session_state.input = ""  # Clear input field
 
-        
-
 # Encapsular el área del chat en un contenedor
 st.subheader("Chat del Asistente")
 chat_container = st.container()
@@ -93,20 +91,32 @@ def plot_energy_usage(building_id, year):
 def generate_report(building_id, year):
     report_content = []
     building_info = next(b for b in st.session_state["id_data"] if b["building_id"] == building_id)
+    
+    # Agregar información del edificio
     report_content.append(f"Reporte de Energía para el Edificio: {building_info['buildingName']}\n")
     report_content.append(f"ID del Edificio: {building_id}\n")
     report_content.append(f"Clase de Energía: {building_info['declaredEnergyClass']}\n")
     report_content.append(f"Consumo Energético Promedio: {building_info['EnergyClassKwhM2']} kWh/m²\n")
-
+    report_content.append("\n")
+    
+    # Agregar datos de consumo de energía
     data = st.session_state["meterings_data"].get(str(building_id))
     if data and str(year) in data:
         df = pd.DataFrame(data[str(year)])
         avg_consumption = df["electricity_use_property"].mean()
         report_content.append(f"Consumo Promedio de Electricidad de la Propiedad en {year}: {avg_consumption:.2f} kWh\n")
-
+        
+        # Detalles mensuales
+        report_content.append("\nDetalles Mensuales del Consumo de Electricidad:\n")
+        report_content.append(df.to_string(index=False))
+        
+    else:
+        report_content.append(f"No se encontraron datos de consumo para el año {year}.\n")
+    
+    # Guardar el reporte en un archivo de texto
     report_path = os.path.join("data", f"reporte_edificio_{building_id}_{year}.txt")
     with open(report_path, 'w', encoding='utf-8') as report_file:
-        report_file.writelines(report_content)
+        report_file.writelines("\n".join(report_content))
     
     return report_path
 
@@ -122,3 +132,4 @@ if st.session_state.get("selected_building_id") and st.session_state.get("select
     # Generar y mostrar el reporte
     report_path = generate_report(building_id, year)
     st.markdown(f"[Descargar Reporte]({report_path})")
+
