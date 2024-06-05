@@ -51,8 +51,9 @@ st.markdown("""
 # Función para manejar la entrada del usuario y limpiar el campo de entrada
 def handle_input():
     user_input = st.session_state.input
-    handle_user_input(user_input)
-    st.session_state.input = ""  # Clear input field
+    if user_input.strip():
+        handle_user_input(user_input)
+        st.session_state.input = ""  # Clear input field
 
 # Encapsular el área del chat en un contenedor
 st.subheader("Chat del Asistente")
