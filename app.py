@@ -28,13 +28,14 @@ st.markdown("""
     <style>
     .stTextInput {
         position: fixed;
-        bottom: 0;
-        width: 50%;
+        bottom: 3%;
+        width: 70%;
+        margin-left: 15%;
     }
     .stButton {
         position: fixed;
-        bottom: 0;
-        right: 0;
+        bottom: 3%;
+        right: 15%;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -45,7 +46,7 @@ user_input = st.text_input("Escribe tu mensaje aquí:", key="input", label_visib
 # Manejar la entrada del usuario
 if st.button("Enviar"):
     handle_user_input(user_input)
-    st.session_state.input = ""  # Clear input field
+    st.session_state["input"] = ""  # Clear input field
 
 # Función para visualizar datos de consumo de energía en un gráfico
 def plot_energy_usage(building_id, year):
@@ -103,4 +104,3 @@ if st.session_state.get("selected_building_id") and st.session_state.get("select
     # Generar y mostrar el reporte
     report_path = generate_report(building_id, year)
     st.markdown(f"[Descargar Reporte]({report_path})")
-
