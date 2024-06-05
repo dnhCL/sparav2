@@ -73,20 +73,24 @@ with user_input_col:
 with button_col:
     st.button("Enviar", on_click=handle_input)
 
-# Función para visualizar datos de consumo de energía en un gráfico
-def plot_energy_usage(building_id, year):
+# Función para generar el gráfico de uso de energía
+def generate_energy_usage_graph(building_id, year):
     data = st.session_state["meterings_data"].get(str(building_id))
     if data and str(year) in data:
         df = pd.DataFrame(data[str(year)])
-        plt.figure(figsize=(10, 5))
-        plt.plot(df["month"], df["electricity_use_property"], label='Electricidad Propiedad')
-        plt.plot(df["month"], df["electricity_use_charging_station"], label='Estación de Carga')
-        plt.plot(df["month"], df["electricity_use_water_heating_and_tap_hot_water"], label='Agua Caliente')
-        plt.xlabel('Mes')
-        plt.ylabel('Consumo de Electricidad (kWh)')
-        plt.title(f'Consumo de Electricidad por Mes en {year}')
-        plt.legend()
-        st.pyplot(plt)
+        fig, ax = plt.subplots(figsize=(10, 5))
+        ax.plot(df["month"], df["electricity_use_property"], label='Electricidad Propiedad')
+        ax.plot(df["month"], df["electricity_use_charging_station"], label='Estación de Carga')
+        ax.plot(df["month"], df["electricity_use_water_heating_and_tap_hot_water"], label='Agua Caliente')
+        ax.set_xlabel('Mes')
+        ax.set_ylabel('Consumo de Electricidad (kWh)')
+        ax.set_title(f'Consumo de Electricidad por Mes en {year}')
+        ax.legend()
+        graph_path = os.path.join("data", f"graph_{building_id}_{year}.png")
+        plt.savefig(graph_path)
+        plt.close(fig)
+        return graph_path
+    return None
 
 # Función para generar un reporte en PDF
 def generate_report(building_id, year):
@@ -110,6 +114,12 @@ def generate_report(building_id, year):
         avg_consumption = df["electricity_use_property"].mean()
         pdf.cell(200, 10, txt=f"Consumo Promedio de Electricidad de la Propiedad en {year}: {avg_consumption:.2f} kWh", ln=True, align='C')
         pdf.ln(10)
+        
+        # Generar y agregar el gráfico
+        graph_path = generate_energy_usage_graph(building_id, year)
+        if graph_path:
+            pdf.image(graph_path, x=10, y=None, w=180)
+            pdf.ln(10)
         
         # Detalles mensuales
         pdf.cell(200, 10, txt="Detalles Mensuales del Consumo de Electricidad:", ln=True, align='C')
