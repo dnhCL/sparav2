@@ -50,10 +50,12 @@ st.markdown("""
 
 # Función para manejar la entrada del usuario y limpiar el campo de entrada
 def handle_input():
-    user_input = st.session_state.get("input", "").strip()
-    if user_input:
+    if "input" in st.session_state and st.session_state.input.strip():
+        user_input = st.session_state.input
         handle_user_input(user_input)
-        st.session_state["input"] = ""  # Clear input field
+        st.session_state.input = ""  # Clear input field
+
+        
 
 # Encapsular el área del chat en un contenedor
 st.subheader("Chat del Asistente")
@@ -68,14 +70,9 @@ with chat_container:
 # Sección de entrada de usuario con botón
 user_input_col, button_col = st.columns([5, 1])
 with user_input_col:
-    user_input = st.text_input("Escribe tu mensaje aquí:", key="input", label_visibility="collapsed")
+    st.text_input("Escribe tu mensaje aquí:", key="input", label_visibility="collapsed", on_change=handle_input)
 with button_col:
-    if st.button("Enviar"):
-        handle_input()
-
-# Manejar el envío de mensajes al presionar Enter
-if user_input and st.session_state.get("input", "").strip():
-    handle_input()
+    st.button("Enviar", on_click=handle_input)
 
 # Función para visualizar datos de consumo de energía en un gráfico
 def plot_energy_usage(building_id, year):
