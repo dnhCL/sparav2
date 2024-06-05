@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import json
 import os
+from fpdf import FPDF
 
 # Inicializar la sesión del chat
 initialize_chat()
@@ -87,36 +88,40 @@ def plot_energy_usage(building_id, year):
         plt.legend()
         st.pyplot(plt)
 
-# Función para generar un reporte
+# Función para generar un reporte en PDF
 def generate_report(building_id, year):
-    report_content = []
     building_info = next(b for b in st.session_state["id_data"] if b["building_id"] == building_id)
+    data = st.session_state["meterings_data"].get(str(building_id))
+    df = pd.DataFrame(data[str(year)]) if data and str(year) in data else pd.DataFrame()
+
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
     
     # Agregar información del edificio
-    report_content.append(f"Reporte de Energía para el Edificio: {building_info['buildingName']}\n")
-    report_content.append(f"ID del Edificio: {building_id}\n")
-    report_content.append(f"Clase de Energía: {building_info['declaredEnergyClass']}\n")
-    report_content.append(f"Consumo Energético Promedio: {building_info['EnergyClassKwhM2']} kWh/m²\n")
-    report_content.append("\n")
+    pdf.cell(200, 10, txt=f"Reporte de Energía para el Edificio: {building_info['buildingName']}", ln=True, align='C')
+    pdf.cell(200, 10, txt=f"ID del Edificio: {building_id}", ln=True, align='C')
+    pdf.cell(200, 10, txt=f"Clase de Energía: {building_info['declaredEnergyClass']}", ln=True, align='C')
+    pdf.cell(200, 10, txt=f"Consumo Energético Promedio: {building_info['EnergyClassKwhM2']} kWh/m²", ln=True, align='C')
+    pdf.ln(10)
     
     # Agregar datos de consumo de energía
-    data = st.session_state["meterings_data"].get(str(building_id))
-    if data and str(year) in data:
-        df = pd.DataFrame(data[str(year)])
+    if not df.empty:
         avg_consumption = df["electricity_use_property"].mean()
-        report_content.append(f"Consumo Promedio de Electricidad de la Propiedad en {year}: {avg_consumption:.2f} kWh\n")
+        pdf.cell(200, 10, txt=f"Consumo Promedio de Electricidad de la Propiedad en {year}: {avg_consumption:.2f} kWh", ln=True, align='C')
+        pdf.ln(10)
         
         # Detalles mensuales
-        report_content.append("\nDetalles Mensuales del Consumo de Electricidad:\n")
-        report_content.append(df.to_string(index=False))
-        
+        pdf.cell(200, 10, txt="Detalles Mensuales del Consumo de Electricidad:", ln=True, align='C')
+        pdf.ln(10)
+        for index, row in df.iterrows():
+            pdf.cell(200, 10, txt=row.to_string(index=False), ln=True, align='C')
     else:
-        report_content.append(f"No se encontraron datos de consumo para el año {year}.\n")
+        pdf.cell(200, 10, txt=f"No se encontraron datos de consumo para el año {year}.", ln=True, align='C')
     
-    # Guardar el reporte en un archivo de texto
-    report_path = os.path.join("data", f"reporte_edificio_{building_id}_{year}.txt")
-    with open(report_path, 'w', encoding='utf-8') as report_file:
-        report_file.writelines("\n".join(report_content))
+    # Guardar el reporte en un archivo PDF
+    report_path = os.path.join("data", f"reporte_edificio_{building_id}_{year}.pdf")
+    pdf.output(report_path)
     
     return report_path
 
@@ -136,6 +141,6 @@ if st.session_state.get("selected_building_id") and st.session_state.get("select
             label="Descargar Reporte",
             data=file,
             file_name=os.path.basename(report_path),
-            mime="text/plain"
+            mime="application/pdf"
         )
 
