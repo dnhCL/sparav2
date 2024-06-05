@@ -68,9 +68,14 @@ with chat_container:
 # Sección de entrada de usuario con botón
 user_input_col, button_col = st.columns([5, 1])
 with user_input_col:
-    st.text_input("Escribe tu mensaje aquí:", key="input", label_visibility="collapsed", on_change=handle_input)
+    user_input = st.text_input("Escribe tu mensaje aquí:", key="input", label_visibility="collapsed")
 with button_col:
-    st.button("Enviar", on_click=handle_input)
+    if st.button("Enviar"):
+        handle_input()
+
+# Manejar el envío de mensajes al presionar Enter
+if st.session_state.get("input") and st.session_state.input.strip():
+    handle_input()
 
 # Función para visualizar datos de consumo de energía en un gráfico
 def plot_energy_usage(building_id, year):
@@ -120,3 +125,4 @@ if st.session_state.get("selected_building_id") and st.session_state.get("select
     # Generar y mostrar el reporte
     report_path = generate_report(building_id, year)
     st.markdown(f"[Descargar Reporte]({report_path})")
+
