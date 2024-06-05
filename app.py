@@ -23,7 +23,7 @@ st.session_state["hvac_systems_data"] = load_json("data/hvac_systems.json")
 st.session_state["id_data"] = load_json("data/id.json")
 st.session_state["buildings"] = st.session_state["id_data"]
 
-# Ocultar la barra lateral que muestra la conversación
+# Ocultar la barra lateral que muestra la conversación y ajustar el estilo del chat
 st.markdown("""
     <style>
     .css-1y0tads {
@@ -32,13 +32,18 @@ st.markdown("""
     .stTextInput {
         position: fixed;
         bottom: 3%;
-        width: 40%;
-        left: 30%;
+        width: 50%;
+        left: 25%;
     }
     .stButton {
         position: fixed;
         bottom: 3%;
-        left: 85%;
+        left: 76%;
+    }
+    .chat-container {
+        max-height: 70vh;
+        overflow-y: auto;
+        padding-bottom: 5rem; /* Espacio para la barra de entrada */
     }
     </style>
     """, unsafe_allow_html=True)
@@ -49,16 +54,23 @@ def handle_input():
     handle_user_input(user_input)
     st.session_state.input = ""  # Clear input field
 
-# Sección de entrada de usuario
-st.text_input("Escribe tu mensaje aquí:", key="input", label_visibility="collapsed", on_change=handle_input)
-
-# Mostrar mensajes del asistente en la interfaz principal
+# Encapsular el área del chat en un contenedor
 st.subheader("Chat del Asistente")
 chat_container = st.container()
 with chat_container:
+    st.markdown('<div class="chat-container">', unsafe_allow_html=True)
     for msg in st.session_state["messages"]:
         role = "Usuario" if msg["role"] == "user" else "Asistente"
         st.markdown(f"**{role}:** {msg['content']}")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# Sección de entrada de usuario con botón
+user_input_col, button_col = st.columns([5, 1])
+with user_input_col:
+    st.text_input("Escribe tu mensaje aquí:", key="input", label_visibility="collapsed", on_change=handle_input)
+with button_col:
+    if st.button("Enviar"):
+        handle_input()
 
 # Función para visualizar datos de consumo de energía en un gráfico
 def plot_energy_usage(building_id, year):
@@ -108,5 +120,6 @@ if st.session_state.get("selected_building_id") and st.session_state.get("select
     # Generar y mostrar el reporte
     report_path = generate_report(building_id, year)
     st.markdown(f"[Descargar Reporte]({report_path})")
+
 
 
