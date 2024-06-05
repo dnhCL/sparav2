@@ -74,7 +74,7 @@ with button_col:
     st.button("Enviar", on_click=handle_input)
 
 # Función para generar el gráfico de uso de energía
-def generate_energy_usage_graph(building_id, year):
+def generate_energy_usage_graph(building_id, year, show_plot=True):
     data = st.session_state["meterings_data"].get(str(building_id))
     if data and str(year) in data:
         df = pd.DataFrame(data[str(year)])
@@ -88,6 +88,8 @@ def generate_energy_usage_graph(building_id, year):
         ax.legend()
         graph_path = os.path.join("data", f"graph_{building_id}_{year}.png")
         plt.savefig(graph_path)
+        if show_plot:
+            st.pyplot(fig)
         plt.close(fig)
         return graph_path
     return None
@@ -116,7 +118,7 @@ def generate_report(building_id, year):
         pdf.ln(10)
         
         # Generar y agregar el gráfico
-        graph_path = generate_energy_usage_graph(building_id, year)
+        graph_path = generate_energy_usage_graph(building_id, year, show_plot=False)
         if graph_path:
             pdf.image(graph_path, x=10, y=None, w=180)
             pdf.ln(10)
@@ -125,7 +127,8 @@ def generate_report(building_id, year):
         pdf.cell(200, 10, txt="Detalles Mensuales del Consumo de Electricidad:", ln=True, align='C')
         pdf.ln(10)
         for index, row in df.iterrows():
-            pdf.cell(200, 10, txt=row.to_string(index=False), ln=True, align='C')
+            row_text = f"{row['month']}: Propiedad={row['electricity_use_property']} kWh, Estación={row['electricity_use_charging_station']} kWh, Agua Caliente={row['electricity_use_water_heating_and_tap_hot_water']} kWh"
+            pdf.cell(200, 10, txt=row_text, ln=True, align='L')
     else:
         pdf.cell(200, 10, txt=f"No se encontraron datos de consumo para el año {year}.", ln=True, align='C')
     
@@ -142,8 +145,8 @@ if st.session_state.get("selected_building_id") and st.session_state.get("select
     building_info = next(b for b in st.session_state["id_data"] if b["building_id"] == building_id)
 
     st.subheader(f"Consumo de Energía para {building_info['buildingName']} en {year}")
-    plot_energy_usage(building_id, year)
-
+    generate_energy_usage_graph(building_id, year)  # Mostrar el gráfico en la ventana del chat
+    
     # Generar y mostrar el reporte
     report_path = generate_report(building_id, year)
     with open(report_path, "rb") as file:
