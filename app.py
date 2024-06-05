@@ -66,7 +66,7 @@ with chat_container:
         st.markdown(f"**{role}:** {msg['content']}")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Sección de entrada de usuario con botón
+# Sección de entrada de usuario con botón / Tengo que arreglar esto !!!!!!!!!!!!!!!!!!!!!! 
 user_input_col, button_col = st.columns([5, 1])
 with user_input_col:
     st.text_input("Escribe tu mensaje aquí:", key="input", label_visibility="collapsed", on_change=handle_input)
