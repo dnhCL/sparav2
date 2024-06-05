@@ -74,7 +74,7 @@ with button_col:
         handle_input()
 
 # Manejar el envío de mensajes al presionar Enter
-if user_input:
+if user_input and st.session_state.get("input", "").strip():
     handle_input()
 
 # Función para visualizar datos de consumo de energía en un gráfico
