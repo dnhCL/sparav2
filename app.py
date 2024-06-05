@@ -4,17 +4,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import json
 import os
-from assistant_instructions import instructions
 
 # Inicializar la sesión del chat
 initialize_chat()
 
 # Título de la aplicación
 st.title("Asistente de Energía para Edificios")
-
-# Mostrar las instrucciones en una sección separada
-with st.expander("Instrucciones del Asistente de Energía para Edificios"):
-    st.markdown(instructions)
 
 # Cargar datos de los edificios
 def load_json(file_path):
@@ -28,12 +23,29 @@ st.session_state["hvac_systems_data"] = load_json("data/hvac_systems.json")
 st.session_state["id_data"] = load_json("data/id.json")
 st.session_state["buildings"] = st.session_state["id_data"]
 
+# Estilo de la aplicación para mantener la barra de entrada siempre en la parte inferior
+st.markdown("""
+    <style>
+    .stTextInput {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+    }
+    .stButton {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
 # Sección de entrada de usuario
-user_input = st.text_input("Escribe tu mensaje aquí:")
+user_input = st.text_input("Escribe tu mensaje aquí:", key="input", label_visibility="collapsed")
 
 # Manejar la entrada del usuario
 if st.button("Enviar"):
     handle_user_input(user_input)
+    st.session_state.input = ""  # Clear input field
 
 # Función para visualizar datos de consumo de energía en un gráfico
 def plot_energy_usage(building_id, year):
@@ -73,9 +85,11 @@ def generate_report(building_id, year):
 
 # Mostrar mensajes del asistente en la interfaz principal
 st.subheader("Chat del Asistente")
-for msg in st.session_state["messages"]:
-    role = "Usuario" if msg["role"] == "user" else "Asistente"
-    st.write(f"{role}: {msg['content']}")
+chat_container = st.container()
+with chat_container:
+    for msg in st.session_state["messages"]:
+        role = "Usuario" if msg["role"] == "user" else "Asistente"
+        st.markdown(f"**{role}:** {msg['content']}")
 
 # Verificar si el asistente ha identificado el edificio y el año
 if st.session_state.get("selected_building_id") and st.session_state.get("selected_year"):
