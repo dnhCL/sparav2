@@ -131,5 +131,11 @@ if st.session_state.get("selected_building_id") and st.session_state.get("select
 
     # Generar y mostrar el reporte
     report_path = generate_report(building_id, year)
-    st.markdown(f"[Descargar Reporte]({report_path})")
+    with open(report_path, "rb") as file:
+        btn = st.download_button(
+            label="Descargar Reporte",
+            data=file,
+            file_name=os.path.basename(report_path),
+            mime="text/plain"
+        )
 
