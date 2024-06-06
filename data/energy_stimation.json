@@ -1,0 +1,22 @@
+{
+    "Double or Triple Glazed Windows": {
+        "Expected Energy Savings (%)": 12,
+        "Estimated Investment Cost (SEK)": 1200000
+    },
+    "Heat Recovery Ventilation System": {
+        "Expected Energy Savings (%)": 8,
+        "Estimated Investment Cost (SEK)": 600000
+    },
+    "LED Lighting in Common Areas": {
+        "Expected Energy Savings (%)": 3,
+        "Estimated Investment Cost (SEK)": 100000
+    },
+    "Optimization of Heating Systems": {
+        "Expected Energy Savings (%)": 7,
+        "Estimated Investment Cost (SEK)": 400000
+    },
+    "Energy Management Systems Installation": {
+        "Expected Energy Savings (%)": 4,
+        "Estimated Investment Cost (SEK)": 200000
+    }
+}

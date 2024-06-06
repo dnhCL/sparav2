@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import json
 import os
-from fpdf import FPDF
+import requests
+from energy_estimation import get_electricity_price, calculate_energy_savings
 
 # Inicializar la sesión del chat
 initialize_chat()
@@ -66,75 +67,63 @@ with chat_container:
         st.markdown(f"**{role}:** {msg['content']}")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Sección de entrada de usuario con botón / Tengo que arreglar esto !!!!!!!!!!!!!!!!!!!!!! 
+# Sección de entrada de usuario con botón
 user_input_col, button_col = st.columns([5, 1])
 with user_input_col:
     st.text_input("Escribe tu mensaje aquí:", key="input", label_visibility="collapsed", on_change=handle_input)
 with button_col:
     st.button("Enviar", on_click=handle_input)
 
-# Función para generar el gráfico de uso de energía
-def generate_energy_usage_graph(building_id, year, show_plot=True):
+# Función para visualizar datos de consumo de energía en un gráfico
+def plot_energy_usage(building_id, year):
     data = st.session_state["meterings_data"].get(str(building_id))
     if data and str(year) in data:
         df = pd.DataFrame(data[str(year)])
-        fig, ax = plt.subplots(figsize=(10, 5))
-        ax.plot(df["month"], df["electricity_use_property"], label='Electricidad Propiedad')
-        ax.plot(df["month"], df["electricity_use_charging_station"], label='Estación de Carga')
-        ax.plot(df["month"], df["electricity_use_water_heating_and_tap_hot_water"], label='Agua Caliente')
-        ax.set_xlabel('Mes')
-        ax.set_ylabel('Consumo de Electricidad (kWh)')
-        ax.set_title(f'Consumo de Electricidad por Mes en {year}')
-        ax.legend()
-        graph_path = os.path.join("data", f"graph_{building_id}_{year}.png")
-        plt.savefig(graph_path)
-        if show_plot:
-            st.pyplot(fig)
-        plt.close(fig)
-        return graph_path
-    return None
+        plt.figure(figsize=(10, 5))
+        plt.plot(df["month"], df["electricity_use_property"], label='Electricidad Propiedad')
+        plt.plot(df["month"], df["electricity_use_charging_station"], label='Estación de Carga')
+        plt.plot(df["month"], df["electricity_use_water_heating_and_tap_hot_water"], label='Agua Caliente')
+        plt.xlabel('Mes')
+        plt.ylabel('Consumo de Electricidad (kWh)')
+        plt.title(f'Consumo de Electricidad por Mes en {year}')
+        plt.legend()
+        st.pyplot(plt)
 
-# Función para generar un reporte en PDF
+# Función para generar un reporte
 def generate_report(building_id, year):
+    report_content = []
     building_info = next(b for b in st.session_state["id_data"] if b["building_id"] == building_id)
-    data = st.session_state["meterings_data"].get(str(building_id))
-    df = pd.DataFrame(data[str(year)]) if data and str(year) in data else pd.DataFrame()
+    report_content.append(f"Reporte de Energía para el Edificio: {building_info['buildingName']}\n")
+    report_content.append(f"ID del Edificio: {building_id}\n")
+    report_content.append(f"Clase de Energía: {building_info['declaredEnergyClass']}\n")
+    report_content.append(f"Consumo Energético Promedio: {building_info['EnergyClassKwhM2']} kWh/m²\n")
 
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    
-    # Agregar información del edificio
-    pdf.cell(200, 10, txt=f"Reporte de Energía para el Edificio: {building_info['buildingName']}", ln=True, align='C')
-    pdf.cell(200, 10, txt=f"ID del Edificio: {building_id}", ln=True, align='C')
-    pdf.cell(200, 10, txt=f"Clase de Energía: {building_info['declaredEnergyClass']}", ln=True, align='C')
-    pdf.cell(200, 10, txt=f"Consumo Energético Promedio: {building_info['EnergyClassKwhM2']} kWh/m²", ln=True, align='C')
-    pdf.ln(10)
-    
-    # Agregar datos de consumo de energía
-    if not df.empty:
+    data = st.session_state["meterings_data"].get(str(building_id))
+    if data and str(year) in data:
+        df = pd.DataFrame(data[str(year)])
         avg_consumption = df["electricity_use_property"].mean()
-        pdf.cell(200, 10, txt=f"Consumo Promedio de Electricidad de la Propiedad en {year}: {avg_consumption:.2f} kWh", ln=True, align='C')
-        pdf.ln(10)
+        report_content.append(f"Consumo Promedio de Electricidad de la Propiedad en {year}: {avg_consumption:.2f} kWh\n")
         
-        # Generar y agregar el gráfico
-        graph_path = generate_energy_usage_graph(building_id, year, show_plot=False)
-        if graph_path:
-            pdf.image(graph_path, x=10, y=None, w=180)
-            pdf.ln(10)
-        
-        # Detalles mensuales
-        pdf.cell(200, 10, txt="Detalles Mensuales del Consumo de Electricidad:", ln=True, align='C')
-        pdf.ln(10)
-        for index, row in df.iterrows():
-            row_text = f"{row['month']}: Propiedad={row['electricity_use_property']} kWh, Estación={row['electricity_use_charging_station']} kWh, Agua Caliente={row['electricity_use_water_heating_and_tap_hot_water']} kWh"
-            pdf.cell(200, 10, txt=row_text, ln=True, align='L')
-    else:
-        pdf.cell(200, 10, txt=f"No se encontraron datos de consumo para el año {year}.", ln=True, align='C')
-    
-    # Guardar el reporte en un archivo PDF
-    report_path = os.path.join("data", f"reporte_edificio_{building_id}_{year}.pdf")
-    pdf.output(report_path)
+        # Obtener el precio de la electricidad para el año
+        price_data = get_electricity_price(f"{year}-01-01")
+        if price_data:
+            avg_price_sek = sum([hour["price_sek"] for hour in price_data]) / len(price_data)
+            report_content.append(f"Precio Promedio de Electricidad en {year}: {avg_price_sek:.2f} SEK/kWh\n")
+
+            # Cálculos de ahorro de energía y ROI
+            try:
+                savings = calculate_energy_savings(building_id, year, avg_consumption)
+                for result in savings:
+                    report_content.append(f"\nMedida: {result['Measure']}")
+                    report_content.append(f"\nAhorro Anual de Energía: {result['Annual Energy Savings (kWh)']:.2f} kWh")
+                    report_content.append(f"\nAhorro Anual en Costos: {result['Annual Cost Savings (SEK)']:.2f} SEK")
+                    report_content.append(f"\nRetorno de Inversión: {result['ROI (years)']:.2f} años")
+            except Exception as e:
+                report_content.append(f"\nError en el cálculo de ahorros: {e}")
+
+    report_path = os.path.join("data", f"reporte_edificio_{building_id}_{year}.txt")
+    with open(report_path, 'w', encoding='utf-8') as report_file:
+        report_file.writelines(report_content)
     
     return report_path
 
@@ -145,15 +134,10 @@ if st.session_state.get("selected_building_id") and st.session_state.get("select
     building_info = next(b for b in st.session_state["id_data"] if b["building_id"] == building_id)
 
     st.subheader(f"Consumo de Energía para {building_info['buildingName']} en {year}")
-    generate_energy_usage_graph(building_id, year)  # Mostrar el gráfico en la ventana del chat
-    
+    plot_energy_usage(building_id, year)
+
     # Generar y mostrar el reporte
     report_path = generate_report(building_id, year)
-    with open(report_path, "rb") as file:
-        btn = st.download_button(
-            label="Descargar Reporte",
-            data=file,
-            file_name=os.path.basename(report_path),
-            mime="application/pdf"
-        )
+    st.markdown(f"[Descargar Reporte]({report_path})")
+
 
