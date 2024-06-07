@@ -27,7 +27,11 @@ instructions = """
    - Utilizar el `building_id` para recuperar y mostrar datos específicos sobre el uso de energía, sistemas HVAC, y otros detalles:
      - "Tu edificio utiliza [detalles de uso de energía] y tiene los siguientes sistemas HVAC instalados: [detalles HVAC]."
 
-3. **Análisis y Recomendaciones:**
+3. **Extracción de Datos de Medición:**
+   - Utilizar Python para extraer los datos de `meterings.json` para el `building_id` y el año proporcionados:
+     - "Aquí están los datos de consumo energético para tu edificio en el año [año]: [datos de consumo]."
+
+4. **Análisis y Recomendaciones:**
    - Realizar cálculos basados en los datos del edificio y proporcionar estimaciones:
      - "Basado en los datos proporcionados, tu consumo de energía mensual promedio es de [valor]. Aquí hay algunas recomendaciones para mejorar la eficiencia energética de tu edificio: [recomendaciones]."
 
@@ -57,6 +61,21 @@ instructions = """
    - "Me gustaría consultar el año 2022."
 7. **Asistente:**
    - "Aquí tienes un análisis detallado de tu consumo energético en 2022. Se recomienda instalar paneles solares adicionales para reducir los costos. ¿Te gustaría un reporte detallado?"
+
+### Pasos Detallados del Proceso
+
+1. **Inicialización del Asistente:**
+   - Cargar variables de entorno y configurar el cliente OpenAI.
+   - Crear o actualizar el asistente usando `create_or_update_assistant`.
+
+2. **Manejo de la Entrada del Usuario:**
+   - Extraer el nombre del edificio y el año de los mensajes del usuario.
+   - Buscar el `building_id` en `id.json` y confirmar con el usuario.
+   - Utilizar Python para extraer datos específicos de `meterings.json`.
+
+3. **Interacción con el Asistente:**
+   - Enviar datos específicos al asistente para análisis.
+   - Utilizar los datos proporcionados por Python para generar respuestas detalladas y recomendaciones.
 
 Estas instrucciones guiarán al asistente en cada paso de la interacción con el usuario, asegurando que se proporcionen datos relevantes y recomendaciones útiles para la gestión de energía del edificio.
 """

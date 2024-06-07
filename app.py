@@ -66,7 +66,7 @@ with chat_container:
         st.markdown(f"**{role}:** {msg['content']}")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Sección de entrada de usuario con botón / Tengo que arreglar esto !!!!!!!!!!!!!!!!!!!!!! 
+# Sección de entrada de usuario con botón
 user_input_col, button_col = st.columns([5, 1])
 with user_input_col:
     st.text_input("Escribe tu mensaje aquí:", key="input", label_visibility="collapsed", on_change=handle_input)
@@ -156,4 +156,3 @@ if st.session_state.get("selected_building_id") and st.session_state.get("select
             file_name=os.path.basename(report_path),
             mime="application/pdf"
         )
-

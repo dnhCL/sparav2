@@ -4,6 +4,8 @@ import time
 from create_update_assistant import create_or_update_assistant
 import os
 from dotenv import load_dotenv
+import json
+import re
 
 # Cargar las variables de entorno
 load_dotenv()
@@ -34,11 +36,6 @@ def initialize_chat():
     if "messages" not in st.session_state:
         st.session_state["messages"] = [{"role": "system", "content": "Hola!, ¿Cómo puedo ayudarte el día de hoy?"}]
 
-    # No mostrar la conversación en la barra lateral
-    # for msg in st.session_state["messages"]:
-    #     role = "Usuario" if msg["role"] == "user" else "Asistente"
-    #     st.sidebar.write(f"{role}: {msg['content']}")
-
 def handle_user_input(prompt):
     if not prompt.strip():
         st.warning("Por favor, introduce un mensaje.")
@@ -51,7 +48,6 @@ def handle_user_input(prompt):
                                             role="user",
                                             content=prompt)
 
-        # Check if there is already an active run
         active_run = None
         try:
             runs = client.beta.threads.runs.list(thread_id=st.session_state["thread_id"])
@@ -87,24 +83,37 @@ def handle_user_input(prompt):
             year = extraer_año(response)
             if year:
                 st.session_state["selected_year"] = year
+
+        # Extraer datos de medidores usando Python
+        if st.session_state.get("selected_building_id") and st.session_state.get("selected_year"):
+            building_id = st.session_state["selected_building_id"]
+            year = st.session_state["selected_year"]
+            metering_data = extract_metering_data(building_id, year)
+            if metering_data:
+                # Enviar los datos al asistente para análisis
+                client.beta.threads.messages.create(thread_id=st.session_state["thread_id"],
+                                                    role="user",
+                                                    content=json.dumps(metering_data))
     except Exception as e:
         st.error(f"Error al procesar el mensaje: {e}")
 
 def extraer_id_edificio(response):
-    # Implementar lógica para extraer el building_id de la respuesta
     for building in st.session_state["buildings"]:
         if building["buildingName"] in response:
             return building["building_id"]
     return None
 
 def extraer_año(response):
-    # Implementar lógica para extraer el año de la respuesta
-    import re
     match = re.search(r'\b(20\d{2})\b', response)
     if match:
         return int(match.group(0))
     return None
 
+def extract_metering_data(building_id, year):
+    meterings = st.session_state["meterings_data"]
+    if str(building_id) in meterings and str(year) in meterings[str(building_id)]:
+        return meterings[str(building_id)][str(year)]
+    return None
 
 
 
