@@ -31,7 +31,11 @@ instructions = """
    - Utilizar Python para extraer los datos de `meterings.json` para el `building_id` y el año proporcionados:
      - "Aquí están los datos de consumo energético para tu edificio en el año [año]: [datos de consumo]."
 
-4. **Análisis y Recomendaciones:**
+4. **Informe Detallado:**
+   - Presentar un informe completo con todos los datos relevantes antes de proporcionar recomendaciones:
+     - "Aquí tienes un informe detallado de todos los datos para tu edificio en el año [año]: [informe detallado]."
+
+5. **Análisis y Recomendaciones:**
    - Realizar cálculos basados en los datos del edificio y proporcionar estimaciones:
      - "Basado en los datos proporcionados, tu consumo de energía mensual promedio es de [valor]. Aquí hay algunas recomendaciones para mejorar la eficiencia energética de tu edificio: [recomendaciones]."
 
@@ -60,7 +64,7 @@ instructions = """
 6. **Usuario:**
    - "Me gustaría consultar el año 2022."
 7. **Asistente:**
-   - "Aquí tienes un análisis detallado de tu consumo energético en 2022. Se recomienda instalar paneles solares adicionales para reducir los costos. ¿Te gustaría un reporte detallado?"
+   - "Aquí tienes un informe detallado de todos los datos para tu edificio en el año 2022: [informe detallado]. Se recomienda instalar paneles solares adicionales para reducir los costos. ¿Te gustaría un reporte detallado?"
 
 ### Pasos Detallados del Proceso
 
@@ -79,3 +83,4 @@ instructions = """
 
 Estas instrucciones guiarán al asistente en cada paso de la interacción con el usuario, asegurando que se proporcionen datos relevantes y recomendaciones útiles para la gestión de energía del edificio.
 """
+

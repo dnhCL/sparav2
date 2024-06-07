@@ -89,11 +89,18 @@ def handle_user_input(prompt):
             building_id = st.session_state["selected_building_id"]
             year = st.session_state["selected_year"]
             metering_data = extract_metering_data(building_id, year)
+            electricity_enduses_data = extract_electricity_enduses_data(building_id)
+            hvac_system_data = extract_hvac_system_data(building_id)
             if metering_data:
                 # Enviar los datos al asistente para análisis
+                full_data = {
+                    "metering_data": metering_data,
+                    "electricity_enduses_data": electricity_enduses_data,
+                    "hvac_system_data": hvac_system_data
+                }
                 client.beta.threads.messages.create(thread_id=st.session_state["thread_id"],
                                                     role="user",
-                                                    content=json.dumps(metering_data))
+                                                    content=json.dumps(full_data))
     except Exception as e:
         st.error(f"Error al procesar el mensaje: {e}")
 
@@ -115,5 +122,10 @@ def extract_metering_data(building_id, year):
         return meterings[str(building_id)][str(year)]
     return None
 
+def extract_electricity_enduses_data(building_id):
+    enduses = st.session_state["electricity_enduses_data"]
+    return next((item for item in enduses if item["building_id"] == building_id), None)
 
-
+def extract_hvac_system_data(building_id):
+    hvac = st.session_state["hvac_systems_data"]
+    return next((item for item in hvac if item["building_id"] == building_id), None)
