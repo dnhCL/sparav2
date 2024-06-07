@@ -132,6 +132,22 @@ def generate_report(building_id, year):
     else:
         pdf.cell(200, 10, txt=f"No se encontraron datos de consumo para el año {year}.", ln=True, align='C')
     
+    # Agregar datos de HVAC y Electricidad Enduses
+    hvac_data = extract_hvac_system_data(building_id)
+    enduses_data = extract_electricity_enduses_data(building_id)
+    
+    if hvac_data:
+        pdf.ln(10)
+        pdf.cell(200, 10, txt="Sistemas HVAC:", ln=True, align='C')
+        for key, value in hvac_data.items():
+            pdf.cell(200, 10, txt=f"{key}: {value}", ln=True, align='L')
+            
+    if enduses_data:
+        pdf.ln(10)
+        pdf.cell(200, 10, txt="Electricidad Enduses:", ln=True, align='C')
+        for key, value in enduses_data.items():
+            pdf.cell(200, 10, txt=f"{key}: {value}", ln=True, align='L')
+    
     # Guardar el reporte en un archivo PDF
     report_path = os.path.join("data", f"reporte_edificio_{building_id}_{year}.pdf")
     pdf.output(report_path)
