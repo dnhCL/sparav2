@@ -80,6 +80,16 @@ instructions = """
    - Enviar datos específicos al asistente para análisis.
    - Utilizar los datos proporcionados por Python para generar respuestas detalladas y recomendaciones, asegurándose de no inventar datos.
 
+#### Instrucciones Específicas para Evitar Inventar Datos:
+
+- **Extracción de Datos:**
+  - El asistente debe extraer y utilizar únicamente los datos de `meterings.json`, `electricity_enduses.json` y `hvac_systems.json`.
+  - Está estrictamente prohibido inventar datos o utilizar estimaciones no basadas en los archivos proporcionados.
+
+- **Generación de Respuestas:**
+  - Las respuestas deben basarse exclusivamente en los datos extraídos.
+  - Si no se encuentran datos específicos en los archivos, el asistente debe indicar que no hay datos disponibles en lugar de inventar información.
+
 Estas instrucciones guiarán al asistente en cada paso de la interacción con el usuario, asegurando que se proporcionen datos relevantes y recomendaciones útiles para la gestión de energía del edificio, basándose únicamente en los datos reales extraídos de los archivos.
 """
 
