@@ -80,8 +80,7 @@ def generate_energy_usage_graph(building_id, year, show_plot=True):
         df = pd.DataFrame(data[str(year)])
         fig, ax = plt.subplots(figsize=(10, 5))
         ax.plot(df["month"], df["electricity_use_property"], label='Property Electricity')
-        ax.plot(df["month"], df["electricity_use_charging_station"], label='Charging Station')
-        ax.plot(df["month"], df["electricity_use_water_heating_and_tap_hot_water"], label='Hot Water')
+
         ax.set_xlabel('Month')
         ax.set_ylabel('Electricity Consumption (kWh)')
         ax.set_title(f'Monthly Electricity Consumption in {year}')
