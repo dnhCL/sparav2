@@ -6,25 +6,25 @@ import json
 import os
 from fpdf import FPDF
 
-# Inicializar la sesión del chat
+# Initialize chat session
 initialize_chat()
 
-# Título de la aplicación
-st.title("Asistente de Energía para Edificios")
+# Application title
+st.title("Building Energy Assistant")
 
-# Cargar datos de los edificios
+# Load building data
 def load_json(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         return json.load(file)
 
-# Cargar datos
+# Load data
 st.session_state["meterings_data"] = load_json("data/meterings.json")
 st.session_state["electricity_enduses_data"] = load_json("data/electricity_enduses.json")
 st.session_state["hvac_systems_data"] = load_json("data/hvac_systems.json")
 st.session_state["id_data"] = load_json("data/id.json")
 st.session_state["buildings"] = st.session_state["id_data"]
 
-# Ocultar la barra lateral que muestra la conversación y ajustar el estilo del chat
+# Hide the sidebar showing the conversation and adjust chat style
 st.markdown("""
     <style>
     .css-1y0tads {
@@ -44,47 +44,47 @@ st.markdown("""
     .chat-container {
         max-height: 70vh;
         overflow-y: auto;
-        padding-bottom: 5rem; /* Espacio para la barra de entrada */
+        padding-bottom: 5rem; /* Space for input bar */
     }
     </style>
     """, unsafe_allow_html=True)
 
-# Función para manejar la entrada del usuario y limpiar el campo de entrada
+# Function to handle user input and clear input field
 def handle_input():
     if "input" in st.session_state and st.session_state.input.strip():
         user_input = st.session_state.input
         handle_user_input(user_input)
         st.session_state.input = ""  # Clear input field
 
-# Encapsular el área del chat en un contenedor
-st.subheader("Chat del Asistente")
+# Encapsulate the chat area in a container
+st.subheader("Assistant Chat")
 chat_container = st.container()
 with chat_container:
     st.markdown('<div class="chat-container">', unsafe_allow_html=True)
     for msg in st.session_state["messages"]:
-        role = "Usuario" if msg["role"] == "user" else "Asistente"
+        role = "User" if msg["role"] == "user" else "Assistant"
         st.markdown(f"**{role}:** {msg['content']}")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Sección de entrada de usuario con botón
+# User input section with button /// Remember: Problem when the message is send using the button.
 user_input_col, button_col = st.columns([5, 1])
 with user_input_col:
-    st.text_input("Escribe tu mensaje aquí:", key="input", label_visibility="collapsed", on_change=handle_input)
+    st.text_input("Type your message here:", key="input", label_visibility="collapsed", on_change=handle_input)
 with button_col:
-    st.button("Enviar", on_click=handle_input)
+    st.button("Send", on_click=handle_input)
 
-# Función para generar el gráfico de uso de energía
+# Function to generate the energy usage graph
 def generate_energy_usage_graph(building_id, year, show_plot=True):
     data = st.session_state["meterings_data"].get(str(building_id))
     if data and str(year) in data:
         df = pd.DataFrame(data[str(year)])
         fig, ax = plt.subplots(figsize=(10, 5))
-        ax.plot(df["month"], df["electricity_use_property"], label='Electricidad Propiedad')
-        ax.plot(df["month"], df["electricity_use_charging_station"], label='Estación de Carga')
-        ax.plot(df["month"], df["electricity_use_water_heating_and_tap_hot_water"], label='Agua Caliente')
-        ax.set_xlabel('Mes')
-        ax.set_ylabel('Consumo de Electricidad (kWh)')
-        ax.set_title(f'Consumo de Electricidad por Mes en {year}')
+        ax.plot(df["month"], df["electricity_use_property"], label='Property Electricity')
+        ax.plot(df["month"], df["electricity_use_charging_station"], label='Charging Station')
+        ax.plot(df["month"], df["electricity_use_water_heating_and_tap_hot_water"], label='Hot Water')
+        ax.set_xlabel('Month')
+        ax.set_ylabel('Electricity Consumption (kWh)')
+        ax.set_title(f'Monthly Electricity Consumption in {year}')
         ax.legend()
         graph_path = os.path.join("data", f"graph_{building_id}_{year}.png")
         plt.savefig(graph_path)
@@ -94,7 +94,7 @@ def generate_energy_usage_graph(building_id, year, show_plot=True):
         return graph_path
     return None
 
-# Función para generar un reporte en PDF
+# Function to generate a PDF report
 def generate_report(building_id, year):
     building_info = next(b for b in st.session_state["id_data"] if b["building_id"] == building_id)
     data = st.session_state["meterings_data"].get(str(building_id))
@@ -104,71 +104,72 @@ def generate_report(building_id, year):
     pdf.add_page()
     pdf.set_font("Arial", size=12)
     
-    # Agregar información del edificio
-    pdf.cell(200, 10, txt=f"Reporte de Energía para el Edificio: {building_info['buildingName']}", ln=True, align='C')
-    pdf.cell(200, 10, txt=f"ID del Edificio: {building_id}", ln=True, align='C')
-    pdf.cell(200, 10, txt=f"Clase de Energía: {building_info['declaredEnergyClass']}", ln=True, align='C')
-    pdf.cell(200, 10, txt=f"Consumo Energético Promedio: {building_info['EnergyClassKwhM2']} kWh/m²", ln=True, align='C')
+    # Add building information
+    pdf.cell(200, 10, txt=f"Energy Report for Building: {building_info['buildingName']}", ln=True, align='C')
+    pdf.cell(200, 10, txt=f"Building ID: {building_id}", ln=True, align='C')
+    pdf.cell(200, 10, txt=f"Energy Class: {building_info['declaredEnergyClass']}", ln=True, align='C')
+    pdf.cell(200, 10, txt=f"Average Energy Consumption: {building_info['EnergyClassKwhM2']} kWh/m²", ln=True, align='C')
     pdf.ln(10)
     
-    # Agregar datos de consumo de energía
+    # Add energy consumption data
     if not df.empty:
         avg_consumption = df["electricity_use_property"].mean()
-        pdf.cell(200, 10, txt=f"Consumo Promedio de Electricidad de la Propiedad en {year}: {avg_consumption:.2f} kWh", ln=True, align='C')
+        pdf.cell(200, 10, txt=f"Average Property Electricity Consumption in {year}: {avg_consumption:.2f} kWh", ln=True, align='C')
         pdf.ln(10)
         
-        # Generar y agregar el gráfico
+        # Generate and add the graph
         graph_path = generate_energy_usage_graph(building_id, year, show_plot=False)
         if graph_path:
             pdf.image(graph_path, x=10, y=None, w=180)
             pdf.ln(10)
         
-        # Detalles mensuales
-        pdf.cell(200, 10, txt="Detalles Mensuales del Consumo de Electricidad:", ln=True, align='C')
+        # Monthly details
+        pdf.cell(200, 10, txt="Monthly Electricity Consumption Details:", ln=True, align='C')
         pdf.ln(10)
         for index, row in df.iterrows():
-            row_text = f"{row['month']}: Propiedad={row['electricity_use_property']} kWh, Estación={row['electricity_use_charging_station']} kWh, Agua Caliente={row['electricity_use_water_heating_and_tap_hot_water']} kWh"
+            row_text = f"{row['month']}: Property={row['electricity_use_property']} kWh, Station={row['electricity_use_charging_station']} kWh, Hot Water={row['electricity_use_water_heating_and_tap_hot_water']} kWh"
             pdf.cell(200, 10, txt=row_text, ln=True, align='L')
     else:
-        pdf.cell(200, 10, txt=f"No se encontraron datos de consumo para el año {year}.", ln=True, align='C')
+        pdf.cell(200, 10, txt=f"No consumption data found for the year {year}.", ln=True, align='C')
     
-    # Agregar datos de HVAC y Electricidad Enduses
+    # Add HVAC and Electricity Enduses data
     hvac_data = extract_hvac_system_data(building_id)
     enduses_data = extract_electricity_enduses_data(building_id)
     
     if hvac_data:
         pdf.ln(10)
-        pdf.cell(200, 10, txt="Sistemas HVAC:", ln=True, align='C')
+        pdf.cell(200, 10, txt="HVAC Systems:", ln=True, align='C')
         for key, value in hvac_data.items():
             pdf.cell(200, 10, txt=f"{key}: {value}", ln=True, align='L')
             
     if enduses_data:
         pdf.ln(10)
-        pdf.cell(200, 10, txt="Electricidad Enduses:", ln=True, align='C')
+        pdf.cell(200, 10, txt="Electricity Enduses:", ln=True, align='C')
         for key, value in enduses_data.items():
             pdf.cell(200, 10, txt=f"{key}: {value}", ln=True, align='L')
     
-    # Guardar el reporte en un archivo PDF
-    report_path = os.path.join("data", f"reporte_edificio_{building_id}_{year}.pdf")
+    # Save the report to a PDF file
+    report_path = os.path.join("data", f"building_report_{building_id}_{year}.pdf")
     pdf.output(report_path)
     
     return report_path
 
-# Verificar si el asistente ha identificado el edificio y el año
+# Check if the assistant has identified the building and year
 if st.session_state.get("selected_building_id") and st.session_state.get("selected_year"):
     building_id = st.session_state["selected_building_id"]
     year = st.session_state["selected_year"]
     building_info = next(b for b in st.session_state["id_data"] if b["building_id"] == building_id)
 
-    st.subheader(f"Consumo de Energía para {building_info['buildingName']} en {year}")
-    generate_energy_usage_graph(building_id, year)  # Mostrar el gráfico en la ventana del chat
+    st.subheader(f"Energy Consumption for {building_info['buildingName']} in {year}")
+    generate_energy_usage_graph(building_id, year)  # Display the graph in the chat window
     
-    # Generar y mostrar el reporte
+    # Generate and display the report
     report_path = generate_report(building_id, year)
     with open(report_path, "rb") as file:
         btn = st.download_button(
-            label="Descargar Reporte",
+            label="Download Report",
             data=file,
             file_name=os.path.basename(report_path),
             mime="application/pdf"
         )
+

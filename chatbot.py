@@ -7,15 +7,15 @@ from dotenv import load_dotenv
 import json
 import re
 
-# Cargar las variables de entorno
+# Load environment variables
 load_dotenv()
-# Cargar las variables de entorno y configurar el cliente OpenAI
+# Load environment variables and set up the OpenAI client
 OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 assistant_id = st.secrets["assistant_id"]
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
-# Rutas de documentos para el asistente (adaptar según sea necesario)
+# Document paths for the assistant (adapt as needed)
 file_paths = [
     "data/Q.txt",
     "data/meterings.json",
@@ -34,11 +34,11 @@ def initialize_chat():
         st.session_state["thread_id"] = thread.id
 
     if "messages" not in st.session_state:
-        st.session_state["messages"] = [{"role": "system", "content": "Hola!, ¿Cómo puedo ayudarte el día de hoy?"}]
+        st.session_state["messages"] = [{"role": "system", "content": "Hello! How can I help you today?"}]
 
 def handle_user_input(prompt):
     if not prompt.strip():
-        st.warning("Por favor, introduce un mensaje.")
+        st.warning("Please enter a message.")
         return
 
     st.session_state.messages.append({"role": "user", "content": prompt})
@@ -53,7 +53,7 @@ def handle_user_input(prompt):
             runs = client.beta.threads.runs.list(thread_id=st.session_state["thread_id"])
             active_run = next((run for run in runs.data if run.status == 'active'), None)
         except Exception as e:
-            st.error(f"Error al obtener las ejecuciones del hilo: {e}")
+            st.error(f"Error fetching thread runs: {e}")
 
         if active_run:
             run = active_run
@@ -72,19 +72,19 @@ def handle_user_input(prompt):
         response = messages.data[0].content[0].text.value
         st.session_state.messages.append({"role": "assistant", "content": response})
 
-        # Si el asistente identifica un edificio
-        if "edificio" in response.lower():
-            building_id = extraer_id_edificio(response)
+        # If the assistant identifies a building
+        if "building" in response.lower():
+            building_id = extract_building_id(response)
             if building_id:
                 st.session_state["selected_building_id"] = building_id
 
-        # Si el asistente identifica un año
-        if "año" in response.lower():
-            year = extraer_año(response)
+        # If the assistant identifies a year
+        if "year" in response.lower():
+            year = extract_year(response)
             if year:
                 st.session_state["selected_year"] = year
 
-        # Extraer datos de medidores usando Python
+        # Extract meter data using Python /// Remember: It is not working very well this point
         if st.session_state.get("selected_building_id") and st.session_state.get("selected_year"):
             building_id = st.session_state["selected_building_id"]
             year = st.session_state["selected_year"]
@@ -92,7 +92,7 @@ def handle_user_input(prompt):
             electricity_enduses_data = extract_electricity_enduses_data(building_id)
             hvac_system_data = extract_hvac_system_data(building_id)
             if metering_data:
-                # Enviar los datos al asistente para análisis
+                # Send data to the assistant for analysis
                 full_data = {
                     "metering_data": metering_data,
                     "electricity_enduses_data": electricity_enduses_data,
@@ -102,15 +102,15 @@ def handle_user_input(prompt):
                                                     role="user",
                                                     content=json.dumps(full_data))
     except Exception as e:
-        st.error(f"Error al procesar el mensaje: {e}")
+        st.error(f"Error processing message: {e}")
 
-def extraer_id_edificio(response):
+def extract_building_id(response):
     for building in st.session_state["buildings"]:
         if building["buildingName"] in response:
             return building["building_id"]
     return None
 
-def extraer_año(response):
+def extract_year(response):
     match = re.search(r'\b(20\d{2})\b', response)
     if match:
         return int(match.group(0))
