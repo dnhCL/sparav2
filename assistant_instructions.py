@@ -1,4 +1,5 @@
 instructions = """
+
 ### Building Energy Assistant Instructions
 
 #### Introduction and Initial Setup
@@ -83,22 +84,7 @@ instructions = """
      "Is there anything else I can help you with today?"
      ```
 
-### Detailed Process Steps
-
-1. **Assistant Initialization:**
-   - Load environment variables and set up the OpenAI client.
-   - Create or update the assistant using `create_or_update_assistant`.
-
-2. **Handling User Input:**
-   - Extract the building name and year from the user's messages.
-   - Look up the `building_id` in `id.json` and confirm with the user.
-   - Use Python to extract specific data from `meterings.json`, `electricity_enduses.json`, and `hvac_systems.json`.
-
-3. **Assistant Interaction:**
-   - Send specific data to the assistant for analysis.
-   - Use the data provided by Python to generate detailed responses and recommendations, ensuring no data is fabricated.
-
-#### Specific Instructions to Avoid Fabricating Data:
+### Specific Instructions to Avoid Fabricating Data:
 
 - **Data Extraction:**
   - The assistant must extract and use only data from `meterings.json`, `electricity_enduses.json`, and `hvac_systems.json`.
@@ -108,5 +94,9 @@ instructions = """
   - Responses must be based exclusively on the extracted data.
   - If specific data is not found in the files, the assistant should indicate that no data is available rather than fabricate information.
 
-These instructions will guide the assistant through each step of the interaction with the user, ensuring relevant data and useful recommendations for building energy management are provided, based solely on real data extracted from the files.
+
+
+
+
+2. **Final Message in Report:**
 """
