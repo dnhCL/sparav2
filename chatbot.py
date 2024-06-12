@@ -6,11 +6,10 @@ import os
 from dotenv import load_dotenv
 import json
 import re
-from datetime import datetime
-import base64
 
 # Load environment variables
 load_dotenv()
+# Load environment variables and set up the OpenAI client
 OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 assistant_id = st.secrets["assistant_id"]
 
@@ -35,7 +34,7 @@ def initialize_chat():
         st.session_state["thread_id"] = thread.id
 
     if "messages" not in st.session_state:
-        st.session_state["messages"] = [{"role": "system", "content": "Hello, I am your building energy management assistant. How can I assist you today?"}]
+        st.session_state["messages"] = [{"role": "system", "content": "Hello! How can I help you today?"}]
 
 def handle_user_input(prompt):
     if not prompt.strip():
@@ -105,18 +104,6 @@ def handle_user_input(prompt):
     except Exception as e:
         st.error(f"Error processing message: {e}")
 
-def save_conversation_log():
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    log_filename = f"log_{timestamp}.txt"
-    log_content = ""
-    for message in st.session_state.messages:
-        log_content += f"{message['role'].capitalize()}: {message['content']}\n"
-    
-    # Guardar el contenido en un archivo descargable
-    b64 = base64.b64encode(log_content.encode()).decode()
-    href = f'<a href="data:file/txt;base64,{b64}" download="{log_filename}">Download log file</a>'
-    st.markdown(href, unsafe_allow_html=True)
-
 def extract_building_id(response):
     for building in st.session_state["buildings"]:
         if building["buildingName"] in response:
@@ -142,7 +129,3 @@ def extract_electricity_enduses_data(building_id):
 def extract_hvac_system_data(building_id):
     hvac = st.session_state["hvac_systems_data"]
     return next((item for item in hvac if item["building_id"] == building_id), None)
-
-# En el lugar apropiado del código, probablemente al final de la conversación
-if st.button('Save Conversation Log'):
-    save_conversation_log()
