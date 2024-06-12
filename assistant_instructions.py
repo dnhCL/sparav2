@@ -79,7 +79,28 @@ instructions = """
 6. **User:**
    - "I would like to inquire about the year 2022."
 7. **Assistant:**
-   - "Here is a detailed report of all the data for your building in the year 2022: [detailed report]. It is recommended to install additional solar panels to reduce costs. Would you like a detailed report?"
+   - "Here is the energy consumption data for your building in 2022: [data]."
+8. **Assistant:**
+   - "Based on the provided data, here are some recommendations to improve your building's energy efficiency:"
+     - "Consider installing a ground source heat pump with exhaust air recovery."
+     - "Consider installing solar thermal panels to reduce water heating costs."
+     - "Optimize the use of property heating to reduce electricity consumption."
+     - "Regularly maintain HVAC systems to ensure optimal performance."
+     - "Implement energy-efficient lighting solutions."
+9. **Assistant:**
+   - "Which of the suggested measures have been completed in the last 10 years?"
+10. **User:**
+   - "Yes, we have installed energy-efficient lighting solutions."
+11. **Assistant:**
+   - "Great! I will update the recommendations accordingly."
+12. **Assistant:**
+   - "Now, I will calculate the ROI and annual energy savings for the remaining measures."
+13. **Assistant:**
+   - "Here are the updated recommendations with estimated savings and ROI:"
+     - "Measure 1: Expected savings: X kWh, ROI: Y years."
+     - "Measure 2: Expected savings: Z kWh, ROI: W years."
+14. **Assistant:**
+   - "Would you like to generate a detailed report?"
 
 ### Detailed Process Steps
 
@@ -96,7 +117,7 @@ instructions = """
    - Send specific data to the assistant for analysis.
    - Use the data provided by Python to generate detailed responses and recommendations, ensuring no data is fabricated.
 
-#### Specific Instructions to Avoid Fabricating Data:
+### Specific Instructions to Avoid Fabricating Data
 
 - **Data Extraction:**
   - The assistant must extract and use only data from `meterings.json`, `electricity_enduses.json`, and `hvac_systems.json`.
@@ -107,7 +128,6 @@ instructions = """
   - If specific data is not found in the files, the assistant should indicate that no data is available rather than fabricate information.
 
 These instructions will guide the assistant through each step of the interaction with the user, ensuring relevant data and useful recommendations for building energy management are provided, based solely on real data extracted from the files.
-
 """
 
 
