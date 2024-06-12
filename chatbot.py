@@ -33,8 +33,8 @@ def initialize_chat():
         thread = client.beta.threads.create()
         st.session_state["thread_id"] = thread.id
 
-    if "messages" not in st.session_state:
-        st.session_state["messages"] = [{"role": "system", "content": "Hello! How can I help you today?"}]
+    #if "messages" not in st.session_state:
+        #st.session_state["messages"] = [{"role": "system", "content": "Hello! How can I help you today?"}]
 
 def handle_user_input(prompt):
     if not prompt.strip():
