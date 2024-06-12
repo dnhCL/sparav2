@@ -18,10 +18,7 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 # Document paths for the assistant (adapt as needed)
 file_paths = [
     "data/Q.txt",
-    "data/meterings.json",
-    "data/electricity_enduses.json",
-    "data/hvac_systems.json",
-    "data/id.json"
+
 ]
 
 def initialize_chat():

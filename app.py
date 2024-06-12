@@ -25,7 +25,7 @@ st.session_state["buildings"] = st.session_state["id_data"]
 
 # Inicializar variables de estado de la sesión
 if "conversation_step" not in st.session_state:
-    st.session_state["conversation_step"] = 1  # Empezamos en el paso 1 para usar el mensaje de bienvenida de chatbot.py
+    st.session_state["conversation_step"] = 1  # Empezamos en el paso 1
 if "selected_building_id" not in st.session_state:
     st.session_state["selected_building_id"] = None
 if "selected_year" not in st.session_state:
@@ -37,8 +37,8 @@ if "recommendations" not in st.session_state:
 def handle_input():
     if "input" in st.session_state and st.session_state.input.strip():
         user_input = st.session_state.input
-        handle_user_input(user_input)
         st.session_state.input = ""  # Limpiar el campo de entrada
+        handle_user_input(user_input)
 
 # Encapsular el área de chat en un contenedor
 st.subheader("Assistant Chat")
