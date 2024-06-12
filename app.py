@@ -25,7 +25,7 @@ st.session_state["buildings"] = st.session_state["id_data"]
 
 # Inicializar variables de estado de la sesión
 if "conversation_step" not in st.session_state:
-    st.session_state["conversation_step"] = 0
+    st.session_state["conversation_step"] = 1
 if "selected_building_id" not in st.session_state:
     st.session_state["selected_building_id"] = None
 if "selected_year" not in st.session_state:
