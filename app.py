@@ -2,7 +2,7 @@ import streamlit as st
 from chatbot import initialize_chat, handle_user_input, extract_hvac_system_data, extract_electricity_enduses_data, extract_metering_data
 import json
 import os
-from report_generation import generate_report
+from report_generation import generate_report, generate_energy_usage_graph
 
 # Inicializar la sesión de chat
 initialize_chat()
@@ -85,12 +85,26 @@ if st.session_state.get("selected_building_id") and st.session_state.get("select
     # Suponiendo que las recomendaciones se obtienen de los mensajes del asistente
     recommendations = [msg['content'] for msg in st.session_state["messages"] if msg['role'] == 'assistant']
     
-    # Generar y mostrar el reporte
-    report_path = generate_report(building_id, year, building_info, metering_data, hvac_data, enduses_data, recommendations)
-    with open(report_path, "rb") as file:
-        btn = st.download_button(
-            label="Download Report",
-            data=file,
-            file_name=os.path.basename(report_path),
-            mime="application/pdf"
-        )
+    # Paso 1: Cargar y mostrar datos de consumo energético
+    data = metering_data.get(str(building_id))
+    df = pd.DataFrame(data[str(year)]) if data and str(year) in data else pd.DataFrame()
+    if not df.empty:
+        st.write(f"Energy consumption data for the year {year} loaded successfully.")
+    else:
+        st.write(f"No consumption data found for the year {year}.")
+
+    # Paso 2: Generar y mostrar el gráfico de uso energético
+    graph_path = generate_energy_usage_graph(building_id, year, metering_data, show_plot=True)
+    if graph_path:
+        st.image(graph_path)
+
+    # Paso 3: Generar y mostrar el reporte PDF
+    if st.button("Generate Report"):
+        report_path = generate_report(building_id, year, building_info, metering_data, hvac_data, enduses_data, recommendations)
+        with open(report_path, "rb") as file:
+            st.download_button(
+                label="Download Report",
+                data=file,
+                file_name=os.path.basename(report_path),
+                mime="application/pdf"
+            )
