@@ -6,10 +6,10 @@ import os
 from dotenv import load_dotenv
 import json
 import re
+from datetime import datetime
 
 # Load environment variables
 load_dotenv()
-# Load environment variables and set up the OpenAI client
 OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 assistant_id = st.secrets["assistant_id"]
 
@@ -72,42 +72,69 @@ def handle_user_input(prompt):
         response = messages.data[0].content[0].text.value
         st.session_state.messages.append({"role": "assistant", "content": response})
 
-        # If the assistant identifies a building
-        if "building" in response.lower():
-            building_id = extract_building_id(response)
-            if building_id:
-                st.session_state["selected_building_id"] = building_id
+        # Save the conversation log
+        save_conversation_log()
 
-        # If the assistant identifies a year
-        if "year" in response.lower():
+        # Encapsular cada paso y no avanzar hasta completar
+        if "building_requested" not in st.session_state:
+            st.session_state.messages.append({"role": "assistant", "content": "Please provide the name or address of the building you would like information about."})
+            st.session_state["building_requested"] = True
+            return
+
+        if "building" not in st.session_state and "building_requested" in st.session_state:
+            building_name = extract_building_name(response)
+            building = get_building_by_name(building_name)
+            if building:
+                st.session_state["building"] = building
+                st.session_state.messages.append({"role": "assistant", "content": f"The building information for '{building['buildingName']}' is as follows: [building details]"})
+                del st.session_state["building_requested"]
+            else:
+                st.session_state.messages.append({"role": "assistant", "content": "I couldn't find the building. Please provide a valid building name or address."})
+            return
+
+        if "year_requested" not in st.session_state and "building" in st.session_state:
+            st.session_state.messages.append({"role": "assistant", "content": "Which year would you like to inquire about for energy consumption?"})
+            st.session_state["year_requested"] = True
+            return
+
+        if "year" not in st.session_state and "year_requested" in st.session_state:
             year = extract_year(response)
             if year:
-                st.session_state["selected_year"] = year
+                st.session_state["year"] = year
+                st.session_state.messages.append({"role": "assistant", "content": f"Please wait while I retrieve the energy consumption data for the year {year}."})
+                # Extract data and provide monthly consumption
+                metering_data = extract_metering_data(st.session_state["building"]["building_id"], year)
+                if metering_data:
+                    monthly_consumption = format_monthly_consumption(metering_data)
+                    st.session_state.messages.append({"role": "assistant", "content": monthly_consumption})
+                    # Proveer análisis y recomendaciones
+                    recommendations = generate_recommendations(metering_data)
+                    st.session_state.messages.append({"role": "assistant", "content": recommendations})
+                    # Preguntar sobre la generación de informes
+                    st.session_state.messages.append({"role": "assistant", "content": "Would you like to receive a detailed report with all the data and recommendations?"})
+            else:
+                st.session_state.messages.append({"role": "assistant", "content": "Please provide a valid year."})
 
-        # Extract meter data using Python /// Remember: It is not working very well this point
-        if st.session_state.get("selected_building_id") and st.session_state.get("selected_year"):
-            building_id = st.session_state["selected_building_id"]
-            year = st.session_state["selected_year"]
-            metering_data = extract_metering_data(building_id, year)
-            electricity_enduses_data = extract_electricity_enduses_data(building_id)
-            hvac_system_data = extract_hvac_system_data(building_id)
-            if metering_data:
-                # Send data to the assistant for analysis
-                full_data = {
-                    "metering_data": metering_data,
-                    "electricity_enduses_data": electricity_enduses_data,
-                    "hvac_system_data": hvac_system_data
-                }
-                client.beta.threads.messages.create(thread_id=st.session_state["thread_id"],
-                                                    role="user",
-                                                    content=json.dumps(full_data))
     except Exception as e:
         st.error(f"Error processing message: {e}")
 
-def extract_building_id(response):
+def save_conversation_log():
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_filename = f"log_{timestamp}.txt"
+    with open(log_filename, "w") as log_file:
+        for message in st.session_state.messages:
+            log_file.write(f"{message['role'].capitalize()}: {message['content']}\n")
+
+def extract_building_name(response):
     for building in st.session_state["buildings"]:
-        if building["buildingName"] in response:
-            return building["building_id"]
+        if building["buildingName"].lower() in response.lower():
+            return building["buildingName"]
+    return None
+
+def get_building_by_name(name):
+    for building in st.session_state["buildings"]:
+        if building["buildingName"].lower() == name.lower():
+            return building
     return None
 
 def extract_year(response):
@@ -129,3 +156,11 @@ def extract_electricity_enduses_data(building_id):
 def extract_hvac_system_data(building_id):
     hvac = st.session_state["hvac_systems_data"]
     return next((item for item in hvac if item["building_id"] == building_id), None)
+
+def format_monthly_consumption(metering_data):
+    monthly_data = [f"{month['month']}: {month['electricity_use_property']} kWh" for month in metering_data]
+    return "\n".join(monthly_data)
+
+def generate_recommendations(metering_data):
+    average_consumption = sum(month['electricity_use_property'] for month in metering_data) / len(metering_data)
+    return f"Based on the provided data, your average monthly energy consumption is {average_consumption:.2f} kWh. Here are some recommendations to improve your building's energy efficiency: [recommendations]."
