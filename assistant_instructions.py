@@ -76,7 +76,6 @@ instructions = """
      "Is there anything else I can help you with today?"
      ```
 
-
 ### Detailed Process Steps
 
 1. **Assistant Initialization:**
