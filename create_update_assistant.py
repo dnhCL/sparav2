@@ -16,7 +16,7 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 # --------------------------------------------------------------
 def create_vector_store_with_files(paths):
   # Creating the vector store
-  vector_store_response = client.beta.vector_stores.create(name="Sparabotv2_files")
+  vector_store_response = client.beta.vector_stores.create(name="Sparabotv3_files")
   vector_store_id = vector_store_response.id
 
   # Upload files and associate them with the vector store
@@ -34,7 +34,7 @@ def create_vector_store_with_files(paths):
 # Function to create or update the assistant
 # --------------------------------------------------------------
 def create_or_update_assistant(file_paths):
-  assistant_name = "Sparabotv2"
+  assistant_name = "Sparabotv3"
   vector_store_id = create_vector_store_with_files(file_paths)
 
   # Retrieve list of existing assistants
