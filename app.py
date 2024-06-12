@@ -25,7 +25,7 @@ st.session_state["buildings"] = st.session_state["id_data"]
 
 # Inicializar variables de estado de la sesión
 if "conversation_step" not in st.session_state:
-    st.session_state["conversation_step"] = 1
+    st.session_state["conversation_step"] = 1  # Empezamos en el paso 1 para usar el mensaje de bienvenida de chatbot.py
 if "selected_building_id" not in st.session_state:
     st.session_state["selected_building_id"] = None
 if "selected_year" not in st.session_state:
@@ -66,7 +66,6 @@ st.sidebar.write(f"Recommendations: {st.session_state.get('recommendations')}")
 
 # Flujo interactivo basado en pasos
 if st.session_state["conversation_step"] == 1:
-
     user_input = st.session_state.get("input", "").strip()
     if user_input:
         st.session_state["messages"].append({"role": "user", "content": user_input})
@@ -92,7 +91,16 @@ elif st.session_state["conversation_step"] == 3:
         if building_id:
             st.session_state["selected_building_id"] = building_id
             building_info = next(b for b in st.session_state["id_data"] if b["building_id"] == building_id)
-            st.session_state["messages"].append({"role": "assistant", "content": f"Your building has {building_info['apartments']} apartments and an energy class {building_info['declaredEnergyClass']}. Is this correct?"})
+            st.session_state["messages"].append({"role": "assistant", "content": f"I have found information about your building, '{building_info['buildingName']}'. Here are some key details about the building:"})
+            st.session_state["messages"].append({"role": "assistant", "content": f"""
+                - Number of Apartments: {building_info['apartments']}
+                - Number of Tenants: {building_info['tenants']}
+                - Net Area Residential: {building_info['netAreaResidential']} square meters
+                - Net Area Non-Residential: {building_info['netAreaNonResidential']} square meters
+                - Net Area Heated: {building_info['netHeatedArea']} square meters
+                - Declared Energy Class: {building_info['declaredEnergyClass']}
+                - Energy Class in kWh/m2: {building_info['energyClassKwhM2']}
+            """})
             st.session_state["conversation_step"] = 4
         else:
             st.session_state["messages"].append({"role": "assistant", "content": "I couldn't find the building. Please provide the correct name or address."})
