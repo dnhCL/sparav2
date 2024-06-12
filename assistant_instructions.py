@@ -76,28 +76,6 @@ instructions = """
      "Is there anything else I can help you with today?"
      ```
 
-### Example Conversation Flow
-
-1. **Assistant:**
-   - "Hello, I am your building energy management assistant. How can I assist you today?"
-2. **User:**
-   - "I would like to inquire about my building Brf Sjöstaden 2."
-3. **Assistant:**
-   - "Your building has 110 apartments and an energy class B. Is this correct?"
-4. **User:**
-   - "Yes, that's correct."
-5. **Assistant:**
-   - "Which year would you like to inquire about for energy consumption?"
-6. **User:**
-   - "I would like to inquire about the year 2022."
-7. **Assistant:**
-   - "Here is the electricity consumption for the property during the year 2022: January: [value] kWh, February: [value] kWh, ..."
-8. **Assistant:**
-   - "Your building has the following HVAC systems installed: [HVAC details]."
-9. **Assistant:**
-   - "Based on the provided data, your average monthly energy consumption is [value] kWh. Here are some recommendations to improve your building's energy efficiency: [recommendations]."
-10. **Assistant:**
-    - "Would you like to receive a detailed report with all the data and recommendations?"
 
 ### Detailed Process Steps
 

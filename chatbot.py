@@ -34,7 +34,7 @@ def initialize_chat():
         st.session_state["thread_id"] = thread.id
 
     if "messages" not in st.session_state:
-        st.session_state["messages"] = [{"role": "system", "content": "Hello! How can I help you today?"}]
+        st.session_state["messages"] = [{"role": "system", "content": "Hello, I am your building energy management assistant. How can I assist you today?"}]
 
 def handle_user_input(prompt):
     if not prompt.strip():
