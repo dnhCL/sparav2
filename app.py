@@ -1,5 +1,5 @@
 import streamlit as st
-from chatbot import initialize_chat, handle_user_input, extract_hvac_system_data, extract_electricity_enduses_data, extract_metering_data
+from chatbot import initialize_chat, handle_user_input, extract_hvac_system_data, extract_electricity_enduses_data, extract_metering_data, extract_year
 import pandas as pd
 import json
 import os
@@ -106,17 +106,19 @@ elif st.session_state["conversation_step"] == 4:
 
 elif st.session_state["conversation_step"] == 5:
     user_input = st.session_state.get("input", "").strip()
-    if user_input:
-        st.session_state["messages"].append({"role": "user", "content": user_input})
-        st.session_state["selected_year"] = user_input
+    year = extract_year(user_input)  # Usar extract_year para capturar el año desde la entrada del usuario
+    if year:
+        st.session_state["messages"].append({"role": "user", "content": str(year)})
+        st.session_state["selected_year"] = year
         building_id = st.session_state["selected_building_id"]
         metering_data = st.session_state["meterings_data"]
         data = metering_data.get(str(building_id))
-        df = pd.DataFrame(data[str(user_input)]) if data and str(user_input) in data else pd.DataFrame()
+        df = pd.DataFrame(data[str(year)]) if data and str(year) in data else pd.DataFrame()
         if not df.empty:
-            st.session_state["messages"].append({"role": "assistant", "content": f"Here is the energy consumption data for your building in {user_input}: [data]."})
+            st.session_state["messages"].append({"role": "assistant", "content": f"Here is the energy consumption data for your building in {year}:"})
+            st.session_state["messages"].append({"role": "assistant", "content": df.to_string()})
         else:
-            st.session_state["messages"].append({"role": "assistant", "content": f"No consumption data found for the year {user_input}."})
+            st.session_state["messages"].append({"role": "assistant", "content": f"No consumption data found for the year {year}."})
         st.session_state["conversation_step"] = 6
 
 elif st.session_state["conversation_step"] == 6:
