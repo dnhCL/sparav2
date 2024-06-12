@@ -2,6 +2,7 @@ import streamlit as st
 from chatbot import initialize_chat, handle_user_input, extract_hvac_system_data, extract_electricity_enduses_data, extract_metering_data
 import json
 import os
+import pandas as pd
 from report_generation import generate_report, generate_energy_usage_graph
 
 # Inicializar la sesión de chat
