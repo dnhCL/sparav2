@@ -57,6 +57,13 @@ with user_input_col:
 with button_col:
     st.button("Send", on_click=handle_input)
 
+# Sección de depuración para mostrar las variables de estado
+st.sidebar.header("Debug Information")
+st.sidebar.write(f"Conversation Step: {st.session_state.get('conversation_step')}")
+st.sidebar.write(f"Selected Building ID: {st.session_state.get('selected_building_id')}")
+st.sidebar.write(f"Selected Year: {st.session_state.get('selected_year')}")
+st.sidebar.write(f"Recommendations: {st.session_state.get('recommendations')}")
+
 # Flujo interactivo basado en pasos
 if st.session_state["conversation_step"] == 0:
     st.session_state["conversation_step"] = 1
