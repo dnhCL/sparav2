@@ -94,4 +94,3 @@ if st.session_state.get("selected_building_id") and st.session_state.get("select
             file_name=os.path.basename(report_path),
             mime="application/pdf"
         )
-
