@@ -25,7 +25,7 @@ st.session_state["buildings"] = st.session_state["id_data"]
 
 # Inicializar variables de estado de la sesión
 if "conversation_step" not in st.session_state:
-    st.session_state["conversation_step"] = 1
+    st.session_state["conversation_step"] = 0
 if "selected_building_id" not in st.session_state:
     st.session_state["selected_building_id"] = None
 if "selected_year" not in st.session_state:
@@ -65,9 +65,11 @@ st.sidebar.write(f"Selected Year: {st.session_state.get('selected_year')}")
 st.sidebar.write(f"Recommendations: {st.session_state.get('recommendations')}")
 
 # Flujo interactivo basado en pasos
+if st.session_state["conversation_step"] == 0:
+    st.session_state["conversation_step"] = 1
+    st.session_state["messages"].append({"role": "assistant", "content": "Hello, I am your building energy management assistant. How can I assist you today?"})
 
-
-if st.session_state["conversation_step"] == 1:
+elif st.session_state["conversation_step"] == 1:
     user_input = st.session_state.get("input", "").strip()
     if user_input:
         st.session_state["messages"].append({"role": "user", "content": user_input})
