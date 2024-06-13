@@ -82,75 +82,103 @@ def generate_energy_usage_graph(building_id, year, show_plot=True):
     return None
 
 # Function to generate a PDF report
+class PDF(FPDF):
+    def header(self):
+        self.set_font('Arial', 'B', 12)
+        self.cell(0, 10, 'Energy Efficiency Report for HSB BRF Sjöresan i Stockholm', 0, 1, 'C')
+
+    def footer(self):
+        self.set_y(-15)
+        self.set_font('Arial', 'I', 8)
+        self.cell(0, 10, f'Page {self.page_no()}', 0, 0, 'C')
+
 def generate_report(building_id, year):
     building_info = next(b for b in st.session_state["id_data"] if b["building_id"] == building_id)
     data = st.session_state["meterings_data"].get(str(building_id))
     df = pd.DataFrame(data[str(year)]) if data and str(year) in data else pd.DataFrame()
 
-    pdf = FPDF()
+    pdf = PDF()
     pdf.add_page()
+
     pdf.set_font("Arial", size=12)
     
-    # Add building information with header
+    # General Information
     pdf.set_font("Arial", "B", 16)
-    pdf.cell(200, 10, txt=f"Energy Report for Building: {building_info['buildingName']}", ln=True, align='C')
-    
+    pdf.cell(0, 10, "General Information", ln=True)
     pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt=f"Building ID: {building_id}", ln=True, align='C')
-    pdf.cell(200, 10, txt=f"Energy Class: {building_info['declaredEnergyClass']}", ln=True, align='C')
-    pdf.cell(200, 10, txt=f"Average Energy Consumption: {building_info['EnergyClassKwhM2']} kWh/m²", ln=True, align='C')
+    pdf.cell(0, 10, f"Building Address: {building_info['buildingName']}", ln=True)
+    pdf.cell(0, 10, f"BRF: HSB BRF Sjöresan i Stockholm", ln=True)
+    pdf.cell(0, 10, f"Number of Apartments: Not specified", ln=True)
+    pdf.cell(0, 10, f"Building Year: Not specified", ln=True)
+    pdf.cell(0, 10, f"Atemp (m²): Not specified", ln=True)
     pdf.ln(10)
     
-    # Add energy consumption data with a section title
-    if not df.empty:
-        pdf.set_font("Arial", "B", 14)
-        pdf.cell(200, 10, txt=f"Average Property Electricity Consumption in {year}: {df['electricity_use_property'].mean():.2f} kWh", ln=True, align='C')
+    # Proposed Measures and Reduction Potential
+    pdf.set_font("Arial", "B", 16)
+    pdf.cell(0, 10, "Proposed Measures and Reduction Potential", ln=True)
+    pdf.set_font("Arial", size=12)
+    pdf.cell(60, 10, "Measure", 1)
+    pdf.cell(40, 10, "Energy Savings (%)", 1)
+    pdf.cell(40, 10, "Investment Cost (SEK)", 1)
+    pdf.cell(40, 10, "ROI (years)", 1)
+    pdf.ln(10)
+    
+    measures = [
+        {"measure": "Geothermal Heat Pump", "savings": 15, "cost": 800000, "roi": 7},
+        {"measure": "Solar Panels", "savings": 10, "cost": 500000, "roi": 8},
+        {"measure": "LED Lighting", "savings": 5, "cost": 150000, "roi": 3},
+        {"measure": "Motion Sensors", "savings": 3, "cost": 75000, "roi": 2},
+        {"measure": "EMS", "savings": 5, "cost": 200000, "roi": 4},
+        {"measure": "Boiler Efficiency", "savings": 7, "cost": 300000, "roi": 5},
+        {"measure": "Heat Recovery Systems", "savings": 10, "cost": 400000, "roi": 6}
+    ]
+
+    for measure in measures:
+        pdf.cell(60, 10, measure["measure"], 1)
+        pdf.cell(40, 10, f"{measure['savings']}%", 1)
+        pdf.cell(40, 10, f"{measure['cost']:,}", 1)
+        pdf.cell(40, 10, measure["roi"], 1)
         pdf.ln(10)
-        
-        # Generate and add the graph
-        graph_path = generate_energy_usage_graph(building_id, year, show_plot=False)
-        if graph_path:
-            pdf.image(graph_path, x=10, y=None, w=180)
-            pdf.ln(10)
-        
-        # Monthly details with a section title
-        pdf.set_font("Arial", "B", 14)
-        pdf.cell(200, 10, txt="Monthly Electricity Consumption Details:", ln=True, align='L')
+
+    pdf.ln(10)
+    
+    # Graph of Savings and ROI
+    graph_path = generate_energy_usage_graph(building_id, year, show_plot=False)
+    if graph_path:
+        pdf.image(graph_path, x=10, y=None, w=180)
         pdf.ln(10)
-        
-        pdf.set_font("Arial", size=12)
-        for index, row in df.iterrows():
-            row_text = f"{row['month']}: Property={row['electricity_use_property']} kWh, Station={row['electricity_use_charging_station']} kWh, Hot Water={row['electricity_use_water_heating_and_tap_hot_water']} kWh"
-            pdf.cell(200, 10, txt=row_text, ln=True, align='L')
-    else:
-        pdf.cell(200, 10, txt=f"No consumption data found for the year {year}.", ln=True, align='C')
     
-    # Add HVAC and Electricity Enduses data with section titles
-    pdf.ln(10)
-    pdf.set_font("Arial", "B", 14)
-    pdf.cell(200, 10, txt="HVAC Systems:", ln=True, align='L')
-    
+    # Total Reduction Potential
+    pdf.set_font("Arial", "B", 16)
+    pdf.cell(0, 10, "Total Reduction Potential", ln=True)
     pdf.set_font("Arial", size=12)
-    hvac_data = extract_hvac_system_data(building_id)
-    if hvac_data:
-        for key, value in hvac_data.items():
-            pdf.cell(200, 10, txt=f"{key}: {value}", ln=True, align='L')
-    
+    initial_energy_use = 1912231.20
+    total_savings_percentage = sum(m["savings"] for m in measures)
+    reduced_energy_use = initial_energy_use * (1 - total_savings_percentage / 100)
+    annual_savings = initial_energy_use - reduced_energy_use
+    annual_savings_sek = annual_savings * 1.5  # Assuming 1.5 SEK per kWh
+
+    pdf.cell(0, 10, f"Total Energy Use Before Measures: {initial_energy_use:.2f} kWh", ln=True)
+    pdf.cell(0, 10, f"Total Energy Use After Measures: {reduced_energy_use:.2f} kWh", ln=True)
+    pdf.cell(0, 10, f"Annual Energy Savings: {annual_savings:.2f} kWh", ln=True)
+    pdf.cell(0, 10, f"Annual Savings in SEK: {annual_savings_sek:.2f} SEK", ln=True)
+    pdf.cell(0, 10, f"Annual Savings per Apartment: {annual_savings_sek / 100:.2f} SEK", ln=True)
     pdf.ln(10)
-    pdf.set_font("Arial", "B", 14)
-    pdf.cell(200, 10, txt="Electricity Enduses:", ln=True, align='L')
     
+    # Conclusion
+    pdf.set_font("Arial", "B", 16)
+    pdf.cell(0, 10, "Conclusion", ln=True)
     pdf.set_font("Arial", size=12)
-    enduses_data = extract_electricity_enduses_data(building_id)
-    if enduses_data:
-        for key, value in enduses_data.items():
-            pdf.cell(200, 10, txt=f"{key}: {value}", ln=True, align='L')
+    pdf.cell(0, 10, "Please do not hesitate to ask additional questions to me.", ln=True)
+    pdf.cell(0, 10, "Now I recommend you to send this report to Reza Tehrani, your Senior Energy and Climate Advisor to get a full breakdown.", ln=True)
+    pdf.cell(0, 10, "Sincerely,", ln=True)
+    pdf.cell(0, 10, "Spara, your Junior Energy and Climate Advisor", ln=True)
     
     # Save the report to a PDF file
     report_path = os.path.join("data", f"building_report_{building_id}_{year}.pdf")
     pdf.output(report_path)
     
-    return report_path
+    return
 
 # Check if the assistant has identified the building, year, and if report is requested
 if st.session_state.get("selected_building_id") and st.session_state.get("selected_year") and st.session_state.get("report_requested"):
