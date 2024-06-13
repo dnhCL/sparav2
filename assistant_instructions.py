@@ -24,7 +24,7 @@ instructions = """
 #### Data Processing and Calculations
 
 **Step 5: Question about Year of Interest**
-- Message: "Which year would you like to inquire about for energy consumption?"
+- Message: "Which year would you like to inquire about for energy consumption, 2022 or 2023?"
 - Wait for the user to provide the year before continuing.
 
 **Step 6: Extraction of Real Data**
