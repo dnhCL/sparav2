@@ -1,7 +1,7 @@
 import streamlit as st
 from openai import OpenAI
 import time
-from create_update_assistant import create_or_update_assistant
+from create_update_assistant import create_or_update_assistant, evaluate_energy_profile
 import os
 from dotenv import load_dotenv
 import json
@@ -9,7 +9,6 @@ import re
 
 # Load environment variables
 load_dotenv()
-# Load environment variables and set up the OpenAI client
 OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 assistant_id = st.secrets["assistant_id"]
 
@@ -17,11 +16,10 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Document paths for the assistant (adapt as needed)
 file_paths = [
-    "data/Q.txt",
+    "data/id.json",
     "data/meterings.json",
     "data/electricity_enduses.json",
-    "data/hvac_systems.json",
-    "data/id.json"
+    "data/hvac_systems.json"
 ]
 
 def initialize_chat():
@@ -78,54 +76,40 @@ def handle_user_input(prompt):
             if building_id:
                 st.session_state["selected_building_id"] = building_id
 
-        # If the assistant identifies a year
-        if "year" in response.lower():
-            year = extract_year(response)
-            if year:
-                st.session_state["selected_year"] = year
-
-        # Extract meter data using Python /// Remember: It is not working very well this point
-        if st.session_state.get("selected_building_id") and st.session_state.get("selected_year"):
+        # Extract meter data using Code Interpreter
+        if st.session_state.get("selected_building_id"):
             building_id = st.session_state["selected_building_id"]
-            year = st.session_state["selected_year"]
-            metering_data = extract_metering_data(building_id, year)
-            electricity_enduses_data = extract_electricity_enduses_data(building_id)
-            hvac_system_data = extract_hvac_system_data(building_id)
-            if metering_data:
-                # Send data to the assistant for analysis
-                full_data = {
-                    "metering_data": metering_data,
-                    "electricity_enduses_data": electricity_enduses_data,
-                    "hvac_system_data": hvac_system_data
-                }
-                client.beta.threads.messages.create(thread_id=st.session_state["thread_id"],
-                                                    role="user",
-                                                    content=json.dumps(full_data))
+            result = evaluate_energy_profile(building_id)
+            peak_power, primary_energy_use_intensity = parse_code_interpreter_result(result)
+            st.session_state["peak_power"] = peak_power
+            st.session_state["primary_energy_use_intensity"] = primary_energy_use_intensity
+
     except Exception as e:
         st.error(f"Error processing message: {e}")
 
 def extract_building_id(response):
-    for building in st.session_state["buildings"]:
-        if building["buildingName"] in response:
+    with open('data/id.json', 'r') as f:
+        id_data = json.load(f)
+    for building in id_data:
+        if building["address"].lower() in response.lower():
             return building["building_id"]
     return None
 
-def extract_year(response):
-    match = re.search(r'\b(20\d{2})\b', response)
-    if match:
-        return int(match.group(0))
-    return None
+def parse_code_interpreter_result(result):
+    peak_power = None
+    primary_energy_use_intensity = None
+    lines = result.split('\n')
+    for line in lines:
+        if "Peak Power (kW)" in line:
+            peak_power = float(line.split(':')[1].strip())
+        if "Primary Energy Use Intensity (kWh/Atemp)" in line:
+            primary_energy_use_intensity = float(line.split(':')[1].strip())
+    return peak_power, primary_energy_use_intensity
 
-def extract_metering_data(building_id, year):
-    meterings = st.session_state["meterings_data"]
-    if str(building_id) in meterings and str(year) in meterings[str(building_id)]:
-        return meterings[str(building_id)][str(year)]
-    return None
 
-def extract_electricity_enduses_data(building_id):
-    enduses = st.session_state["electricity_enduses_data"]
-    return next((item for item in enduses if item["building_id"] == building_id), None)
 
-def extract_hvac_system_data(building_id):
-    hvac = st.session_state["hvac_systems_data"]
-    return next((item for item in hvac if item["building_id"] == building_id), None)
+# Display results if available
+if "peak_power" in st.session_state and "primary_energy_use_intensity" in st.session_state:
+    st.subheader("Energy Profile")
+    st.write(f"Peak Power (kW): {st.session_state['peak_power']}")
+    st.write(f"Primary Energy Use Intensity (kWh/Atemp): {st.session_state['primary_energy_use_intensity']}")
