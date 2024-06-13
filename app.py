@@ -48,6 +48,19 @@ with user_input_col:
 with button_col:
     st.button("Send", on_click=handle_input)
 
+
+
+def generate_recommendations(building_id):
+    # Dummy implementation for recommendation generation
+    recommendations = [
+        {"measure": "Upgrade to LED lighting", "energy_saving": 15, "investment_cost": 5000, "payback_time": 3},
+        {"measure": "Install solar panels", "energy_saving": 20, "investment_cost": 20000, "payback_time": 5},
+        {"measure": "Improve insulation", "energy_saving": 10, "investment_cost": 10000, "payback_time": 4},
+        {"measure": "Upgrade HVAC system", "energy_saving": 18, "investment_cost": 15000, "payback_time": 6},
+        {"measure": "Install energy-efficient windows", "energy_saving": 12, "investment_cost": 12000, "payback_time": 4}
+    ]
+    return recommendations
+
 # Function to generate the energy usage graph
 def generate_energy_usage_graph(building_id, year, show_plot=True):
     data = st.session_state["meterings_data"].get(str(building_id))
@@ -68,17 +81,6 @@ def generate_energy_usage_graph(building_id, year, show_plot=True):
         return graph_path
     return None
 
-def generate_recommendations(building_id):
-    # Dummy implementation for recommendation generation
-    recommendations = [
-        {"measure": "Upgrade to LED lighting", "energy_saving": 15, "investment_cost": 5000, "payback_time": 3},
-        {"measure": "Install solar panels", "energy_saving": 20, "investment_cost": 20000, "payback_time": 5},
-        {"measure": "Improve insulation", "energy_saving": 10, "investment_cost": 10000, "payback_time": 4},
-        {"measure": "Upgrade HVAC system", "energy_saving": 18, "investment_cost": 15000, "payback_time": 6},
-        {"measure": "Install energy-efficient windows", "energy_saving": 12, "investment_cost": 12000, "payback_time": 4}
-    ]
-    return recommendations
-
 # Function to generate a PDF report
 def generate_report(building_id, year):
     building_info = next(b for b in st.session_state["id_data"] if b["building_id"] == building_id)
@@ -89,17 +91,20 @@ def generate_report(building_id, year):
     pdf.add_page()
     pdf.set_font("Arial", size=12)
     
-    # Add building information
+    # Add building information with header
+    pdf.set_font("Arial", "B", 16)
     pdf.cell(200, 10, txt=f"Energy Report for Building: {building_info['buildingName']}", ln=True, align='C')
+    
+    pdf.set_font("Arial", size=12)
     pdf.cell(200, 10, txt=f"Building ID: {building_id}", ln=True, align='C')
     pdf.cell(200, 10, txt=f"Energy Class: {building_info['declaredEnergyClass']}", ln=True, align='C')
     pdf.cell(200, 10, txt=f"Average Energy Consumption: {building_info['EnergyClassKwhM2']} kWh/m²", ln=True, align='C')
     pdf.ln(10)
     
-    # Add energy consumption data
+    # Add energy consumption data with a section title
     if not df.empty:
-        avg_consumption = df["electricity_use_property"].mean()
-        pdf.cell(200, 10, txt=f"Average Property Electricity Consumption in {year}: {avg_consumption:.2f} kWh", ln=True, align='C')
+        pdf.set_font("Arial", "B", 14)
+        pdf.cell(200, 10, txt=f"Average Property Electricity Consumption in {year}: {df['electricity_use_property'].mean():.2f} kWh", ln=True, align='C')
         pdf.ln(10)
         
         # Generate and add the graph
@@ -108,28 +113,36 @@ def generate_report(building_id, year):
             pdf.image(graph_path, x=10, y=None, w=180)
             pdf.ln(10)
         
-        # Monthly details
-        pdf.cell(200, 10, txt="Monthly Electricity Consumption Details:", ln=True, align='C')
+        # Monthly details with a section title
+        pdf.set_font("Arial", "B", 14)
+        pdf.cell(200, 10, txt="Monthly Electricity Consumption Details:", ln=True, align='L')
         pdf.ln(10)
+        
+        pdf.set_font("Arial", size=12)
         for index, row in df.iterrows():
             row_text = f"{row['month']}: Property={row['electricity_use_property']} kWh, Station={row['electricity_use_charging_station']} kWh, Hot Water={row['electricity_use_water_heating_and_tap_hot_water']} kWh"
             pdf.cell(200, 10, txt=row_text, ln=True, align='L')
     else:
         pdf.cell(200, 10, txt=f"No consumption data found for the year {year}.", ln=True, align='C')
     
-    # Add HVAC and Electricity Enduses data
-    hvac_data = extract_hvac_system_data(building_id)
-    enduses_data = extract_electricity_enduses_data(building_id)
+    # Add HVAC and Electricity Enduses data with section titles
+    pdf.ln(10)
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(200, 10, txt="HVAC Systems:", ln=True, align='L')
     
+    pdf.set_font("Arial", size=12)
+    hvac_data = extract_hvac_system_data(building_id)
     if hvac_data:
-        pdf.ln(10)
-        pdf.cell(200, 10, txt="HVAC Systems:", ln=True, align='C')
         for key, value in hvac_data.items():
             pdf.cell(200, 10, txt=f"{key}: {value}", ln=True, align='L')
-            
+    
+    pdf.ln(10)
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(200, 10, txt="Electricity Enduses:", ln=True, align='L')
+    
+    pdf.set_font("Arial", size=12)
+    enduses_data = extract_electricity_enduses_data(building_id)
     if enduses_data:
-        pdf.ln(10)
-        pdf.cell(200, 10, txt="Electricity Enduses:", ln=True, align='C')
         for key, value in enduses_data.items():
             pdf.cell(200, 10, txt=f"{key}: {value}", ln=True, align='L')
     
