@@ -24,30 +24,6 @@ st.session_state["hvac_systems_data"] = load_json("data/hvac_systems.json")
 st.session_state["id_data"] = load_json("data/id.json")
 st.session_state["buildings"] = st.session_state["id_data"]
 
-# Hide the sidebar showing the conversation and adjust chat style
-st.markdown("""
-    <style>
-    .css-1y0tads {
-        display: none;
-    }
-    .stTextInput {
-        position: fixed;
-        bottom: 3%;
-        width: 50%;
-        left: 25%;
-    }
-    .stButton {
-        position: fixed;
-        bottom: 3%;
-        left: 76%;
-    }
-    .chat-container {
-        max-height: 70vh;
-        overflow-y: auto;
-        padding-bottom: 5rem; /* Space for input bar */
-    }
-    </style>
-    """, unsafe_allow_html=True)
 
 # Function to handle user input and clear input field
 def handle_input():
