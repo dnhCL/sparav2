@@ -137,7 +137,7 @@ def generate_report(building_id, year):
         pdf.cell(60, 10, measure["measure"], 1)
         pdf.cell(40, 10, f"{measure['savings']}%", 1)
         pdf.cell(40, 10, f"{measure['cost']:,}", 1)
-        pdf.cell(40, 10, measure["roi"], 1)
+        pdf.cell(40, 10, str(measure["roi"]), 1)  # Convert ROI to string
         pdf.ln(10)
 
     pdf.ln(10)
@@ -178,7 +178,7 @@ def generate_report(building_id, year):
     report_path = os.path.join("data", f"building_report_{building_id}_{year}.pdf")
     pdf.output(report_path)
     
-    return
+    return report_path
 
 # Check if the assistant has identified the building, year, and if report is requested
 if st.session_state.get("selected_building_id") and st.session_state.get("selected_year") and st.session_state.get("report_requested"):
