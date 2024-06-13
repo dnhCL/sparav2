@@ -119,11 +119,12 @@ def extract_year(response):
         return int(match.group(0))
     return None
 
-def extract_metering_data(building_id, year):
-    meterings = st.session_state["meterings_data"]
-    if str(building_id) in meterings and str(year) in meterings[str(building_id)]:
-        return meterings[str(building_id)][str(year)]
+def extract_metering_data(building_id, meterings_data):
+    year = 2023
+    if str(building_id) in meterings_data and str(year) in meterings_data[str(building_id)]:
+        return meterings_data[str(building_id)][str(year)]
     return None
+
 
 def extract_electricity_enduses_data(building_id):
     enduses = st.session_state["electricity_enduses_data"]

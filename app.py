@@ -1,5 +1,5 @@
 import streamlit as st
-from chatbot import initialize_chat, handle_user_input, extract_hvac_system_data, extract_electricity_enduses_data, extract_metering_data
+from chatbot import initialize_chat, handle_user_input, extract_hvac_system_data, extract_electricity_enduses_data
 import matplotlib.pyplot as plt
 import pandas as pd
 import json
@@ -24,6 +24,31 @@ st.session_state["hvac_systems_data"] = load_json("data/hvac_systems.json")
 st.session_state["id_data"] = load_json("data/id.json")
 st.session_state["buildings"] = st.session_state["id_data"]
 
+# Hide the sidebar showing the conversation and adjust chat style
+st.markdown("""
+    <style>
+    .css-1y0tads {
+        display: none;
+    }
+    .stTextInput {
+        position: fixed;
+        bottom: 3%;
+        width: 50%;
+        left: 25%;
+    }
+    .stButton {
+        position: fixed;
+        bottom: 3%;
+        left: 76%;
+    }
+    .chat-container {
+        max-height: 70vh;
+        overflow-y: auto;
+        padding-bottom: 5rem; /* Space for input bar */
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
 # Function to handle user input and clear input field
 def handle_input():
     if "input" in st.session_state and st.session_state.input.strip():
@@ -41,19 +66,16 @@ with chat_container:
         st.markdown(f"**{role}:** {msg['content']}")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# User input section with button
+# User input section with button /// Remember: Problem when the message is send using the button.
 user_input_col, button_col = st.columns([5, 1])
 with user_input_col:
     st.text_input("Type your message here:", key="input", label_visibility="collapsed", on_change=handle_input)
 with button_col:
     st.button("Send", on_click=handle_input)
 
-
-
-
-
 # Function to generate the energy usage graph
-def generate_energy_usage_graph(building_id, year, show_plot=True):
+def generate_energy_usage_graph(building_id, show_plot=True):
+    year = 2023
     data = st.session_state["meterings_data"].get(str(building_id))
     if data and str(year) in data:
         df = pd.DataFrame(data[str(year)])
@@ -73,121 +95,76 @@ def generate_energy_usage_graph(building_id, year, show_plot=True):
     return None
 
 # Function to generate a PDF report
-class PDF(FPDF):
-    def header(self):
-        self.set_font('Arial', 'B', 12)
-        self.cell(0, 10, 'Energy Efficiency Report for HSB BRF Sjöresan i Stockholm', 0, 1, 'C')
-
-    def footer(self):
-        self.set_y(-15)
-        self.set_font('Arial', 'I', 8)
-        self.cell(0, 10, f'Page {self.page_no()}', 0, 0, 'C')
-
-def generate_report(building_id, year):
+def generate_report(building_id):
+    year = 2023
     building_info = next(b for b in st.session_state["id_data"] if b["building_id"] == building_id)
     data = st.session_state["meterings_data"].get(str(building_id))
     df = pd.DataFrame(data[str(year)]) if data and str(year) in data else pd.DataFrame()
 
-    pdf = PDF()
+    pdf = FPDF()
     pdf.add_page()
-
     pdf.set_font("Arial", size=12)
     
-    # General Information
-    pdf.set_font("Arial", "B", 16)
-    pdf.cell(0, 10, "General Information", ln=True)
-    pdf.set_font("Arial", size=12)
-    pdf.cell(0, 10, f"Building Address: {building_info['buildingName']}", ln=True)
-    pdf.cell(0, 10, f"BRF: HSB BRF Sjöresan i Stockholm", ln=True)
-    pdf.cell(0, 10, f"Energy Class: {building_info.get('declaredEnergyClass', 'Not specified')}", ln=True)
-    pdf.cell(0, 10, f"Average Energy Consumption: {building_info.get('EnergyClassKwhM2', 'Not specified')} kWh/m²", ln=True)
+    # Add building information
+    pdf.cell(200, 10, txt=f"Energy Report for Building: {building_info['buildingName']}", ln=True, align='C')
+    pdf.cell(200, 10, txt=f"Building ID: {building_id}", ln=True, align='C')
+    pdf.cell(200, 10, txt=f"Energy Class: {building_info['declaredEnergyClass']}", ln=True, align='C')
+    pdf.cell(200, 10, txt=f"Average Energy Consumption: {building_info['EnergyClassKwhM2']} kWh/m²", ln=True, align='C')
     pdf.ln(10)
     
-    # Monthly Energy Consumption
-    pdf.set_font("Arial", "B", 16)
-    pdf.cell(0, 10, f"Monthly Energy Consumption in {year}", ln=True)
-    pdf.ln(10)
-    
+    # Add energy consumption data
     if not df.empty:
-        pdf.set_font("Arial", size=12)
+        avg_consumption = df["electricity_use_property"].mean()
+        pdf.cell(200, 10, txt=f"Average Property Electricity Consumption in {year}: {avg_consumption:.2f} kWh", ln=True, align='C')
+        pdf.ln(10)
+        
+        # Generate and add the graph
+        graph_path = generate_energy_usage_graph(building_id, show_plot=False)
+        if graph_path:
+            pdf.image(graph_path, x=10, y=None, w=180)
+            pdf.ln(10)
+        
+        # Monthly details
+        pdf.cell(200, 10, txt="Monthly Electricity Consumption Details:", ln=True, align='C')
+        pdf.ln(10)
         for index, row in df.iterrows():
             row_text = f"{row['month']}: Property={row['electricity_use_property']} kWh, Station={row['electricity_use_charging_station']} kWh, Hot Water={row['electricity_use_water_heating_and_tap_hot_water']} kWh"
-            pdf.cell(0, 10, row_text, ln=True)
+            pdf.cell(200, 10, txt=row_text, ln=True, align='L')
     else:
-        pdf.cell(0, 10, f"No consumption data found for the year {year}.", ln=True)
-    pdf.ln(10)
+        pdf.cell(200, 10, txt=f"No consumption data found for the year {year}.", ln=True, align='C')
     
-    # Graph of Monthly Consumption
-    graph_path = generate_energy_usage_graph(building_id, year, show_plot=False)
-    if graph_path:
-        pdf.image(graph_path, x=10, y=None, w=180)
-        pdf.ln(10)
-    
-    # HVAC Systems
-    pdf.set_font("Arial", "B", 16)
-    pdf.cell(0, 10, "HVAC Systems", ln=True)
-    pdf.ln(10)
-    
+    # Add HVAC and Electricity Enduses data
     hvac_data = extract_hvac_system_data(building_id)
-    pdf.set_font("Arial", size=12)
-    if hvac_data:
-        for key, value in hvac_data.items():
-            pdf.cell(0, 10, f"{key}: {value}", ln=True)
-    else:
-        pdf.cell(0, 10, "No HVAC data available.", ln=True)
-    pdf.ln(10)
-    
-    # Electricity Enduses
-    pdf.set_font("Arial", "B", 16)
-    pdf.cell(0, 10, "Electricity Enduses", ln=True)
-    pdf.ln(10)
-    
     enduses_data = extract_electricity_enduses_data(building_id)
-    pdf.set_font("Arial", size=12)
-    if enduses_data:
-        for key, value in enduses_data.items():
-            pdf.cell(0, 10, f"{key}: {value}", ln=True)
-    else:
-        pdf.cell(0, 10, "No electricity enduses data available.", ln=True)
-    pdf.ln(10)
     
-    # Conclusion
-    pdf.set_font("Arial", "B", 16)
-    pdf.cell(0, 10, "Conclusion", ln=True)
-    pdf.set_font("Arial", size=12)
-    pdf.cell(0, 10, "Please do not hesitate to ask additional questions to me.", ln=True)
-    pdf.cell(0, 10, "Now I recommend you to send this report to Reza Tehrani, your Senior Energy and Climate Advisor to get a full breakdown.", ln=True)
-    pdf.cell(0, 10, "Sincerely,", ln=True)
-    pdf.cell(0, 10, "Spara, your Junior Energy and Climate Advisor", ln=True)
+    if hvac_data:
+        pdf.ln(10)
+        pdf.cell(200, 10, txt="HVAC Systems:", ln=True, align='C')
+        for key, value in hvac_data.items():
+            pdf.cell(200, 10, txt=f"{key}: {value}", ln=True, align='L')
+            
+    if enduses_data:
+        pdf.ln(10)
+        pdf.cell(200, 10, txt="Electricity Enduses:", ln=True, align='C')
+        for key, value in enduses_data.items():
+            pdf.cell(200, 10, txt=f"{key}: {value}", ln=True, align='L')
     
     # Save the report to a PDF file
     report_path = os.path.join("data", f"building_report_{building_id}_{year}.pdf")
     pdf.output(report_path)
     
     return report_path
-def generate_recommendations(id):
-    # Dummy implementation for recommendation generation
-    recommendations = [
-        {"measure": "Upgrade to LED lighting", "energy_saving": 15, "investment_cost": 5000, "payback_time": 3},
-        {"measure": "Install solar panels", "energy_saving": 20, "investment_cost": 20000, "payback_time": 5},
-        {"measure": "Improve insulation", "energy_saving": 10, "investment_cost": 10000, "payback_time": 4},
-        {"measure": "Upgrade HVAC system", "energy_saving": 18, "investment_cost": 15000, "payback_time": 6},
-        {"measure": "Install energy-efficient windows", "energy_saving": 12, "investment_cost": 12000, "payback_time": 4}
-    ]
-    return recommendations
 
-# Check if the assistant has identified the building, year, and if report is requested
-#and st.session_state.get("report_requested") to consider report
-if st.session_state.get("selected_building_id") and st.session_state.get("selected_year") and st.session_state.get("report_requested") :
+# Check if the assistant has identified the building
+if st.session_state.get("selected_building_id"):
     building_id = st.session_state["selected_building_id"]
-    year = st.session_state["selected_year"]
     building_info = next(b for b in st.session_state["id_data"] if b["building_id"] == building_id)
 
-    st.subheader(f"Energy Consumption for {building_info['buildingName']} in {year}")
+    st.subheader(f"Energy Consumption for {building_info['buildingName']} in 2023")
+    generate_energy_usage_graph(building_id)  # Display the graph in the chat window
     
-
     # Generate and display the report
-    report_path = generate_report(building_id, year)
+    report_path = generate_report(building_id)
     with open(report_path, "rb") as file:
         btn = st.download_button(
             label="Download Report",
@@ -195,12 +172,3 @@ if st.session_state.get("selected_building_id") and st.session_state.get("select
             file_name=os.path.basename(report_path),
             mime="application/pdf"
         )
-
-    # Analysis and Recommendations (Step 9)
-    if st.button("Get Recommendations"):
-        # Perform calculations and provide recommendations
-        recommendations = generate_recommendations(building_id)
-        st.session_state["recommendations"] = recommendations
-        st.write(recommendations)
-
-
