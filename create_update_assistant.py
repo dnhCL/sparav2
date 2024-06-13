@@ -64,7 +64,7 @@ def create_or_update_assistant(file_paths):
     # Create a new assistant
     new_assistant = client.beta.assistants.create(name=assistant_name,
                                                   instructions=instructions,
-                                                  model="gpt-3.5-turbo-0125",
+                                                  model="gpt-4o",
                                                   tools=[{
                                                       "type": "file_search"
                                                   },{
