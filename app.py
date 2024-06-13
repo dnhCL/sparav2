@@ -145,3 +145,21 @@ if st.session_state.get("selected_building_id") and st.session_state.get("select
             file_name=os.path.basename(report_path),
             mime="application/pdf"
         )
+
+    # Analysis and Recommendations (Step 9)
+    if st.button("Get Recommendations"):
+        # Perform calculations and provide recommendations
+        recommendations = generate_recommendations(building_id)
+        st.session_state["recommendations"] = recommendations
+        st.write(recommendations)
+
+def generate_recommendations(building_id):
+    # Dummy implementation for recommendation generation
+    recommendations = [
+        {"measure": "Upgrade to LED lighting", "energy_saving": 15, "investment_cost": 5000, "payback_time": 3},
+        {"measure": "Install solar panels", "energy_saving": 20, "investment_cost": 20000, "payback_time": 5},
+        {"measure": "Improve insulation", "energy_saving": 10, "investment_cost": 10000, "payback_time": 4},
+        {"measure": "Upgrade HVAC system", "energy_saving": 18, "investment_cost": 15000, "payback_time": 6},
+        {"measure": "Install energy-efficient windows", "energy_saving": 12, "investment_cost": 12000, "payback_time": 4}
+    ]
+    return recommendations
