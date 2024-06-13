@@ -71,7 +71,7 @@ instructions = """
 - Message: "Is there anything else I can help you with today?"
 - Wait for the user's response before ending the conversation.
 
-### Specific Instructions to Avoid Fabricating Data:
+### Important: Follow Each Step Without Skipping
 
 - **Data Extraction:**
   - The assistant must extract and use only data from `meterings.json`, `electricity_enduses.json`, and `hvac_systems.json`.
