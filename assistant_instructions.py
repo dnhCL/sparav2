@@ -57,7 +57,7 @@ instructions = """
   "Based on the provided data, your average monthly energy consumption is [value] kWh. Here are some recommendations to improve your building's energy efficiency: [recommendations]."
 - Wait for the user to acknowledge the information before continuing.
 
-#### Report Generation and Next Steps (Important)
+#### Report Generation and Next Steps 
 
 **Step 10: Question about Report Generation**
 - Message: "Would you like to receive a detailed report with all the data and recommendations?"
