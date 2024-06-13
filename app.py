@@ -50,16 +50,7 @@ with button_col:
 
 
 
-def generate_recommendations(building_id):
-    # Dummy implementation for recommendation generation
-    recommendations = [
-        {"measure": "Upgrade to LED lighting", "energy_saving": 15, "investment_cost": 5000, "payback_time": 3},
-        {"measure": "Install solar panels", "energy_saving": 20, "investment_cost": 20000, "payback_time": 5},
-        {"measure": "Improve insulation", "energy_saving": 10, "investment_cost": 10000, "payback_time": 4},
-        {"measure": "Upgrade HVAC system", "energy_saving": 18, "investment_cost": 15000, "payback_time": 6},
-        {"measure": "Install energy-efficient windows", "energy_saving": 12, "investment_cost": 12000, "payback_time": 4}
-    ]
-    return recommendations
+
 
 # Function to generate the energy usage graph
 def generate_energy_usage_graph(building_id, year, show_plot=True):
@@ -174,6 +165,16 @@ def generate_report(building_id, year):
     pdf.output(report_path)
     
     return report_path
+def generate_recommendations(id):
+    # Dummy implementation for recommendation generation
+    recommendations = [
+        {"measure": "Upgrade to LED lighting", "energy_saving": 15, "investment_cost": 5000, "payback_time": 3},
+        {"measure": "Install solar panels", "energy_saving": 20, "investment_cost": 20000, "payback_time": 5},
+        {"measure": "Improve insulation", "energy_saving": 10, "investment_cost": 10000, "payback_time": 4},
+        {"measure": "Upgrade HVAC system", "energy_saving": 18, "investment_cost": 15000, "payback_time": 6},
+        {"measure": "Install energy-efficient windows", "energy_saving": 12, "investment_cost": 12000, "payback_time": 4}
+    ]
+    return recommendations
 
 # Check if the assistant has identified the building, year, and if report is requested
 if st.session_state.get("selected_building_id") and st.session_state.get("selected_year") and st.session_state.get("report_requested"):
@@ -182,6 +183,7 @@ if st.session_state.get("selected_building_id") and st.session_state.get("select
     building_info = next(b for b in st.session_state["id_data"] if b["building_id"] == building_id)
 
     st.subheader(f"Energy Consumption for {building_info['buildingName']} in {year}")
+    
 
     # Generate and display the report
     report_path = generate_report(building_id, year)
