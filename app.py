@@ -108,61 +108,56 @@ def generate_report(building_id, year):
     pdf.set_font("Arial", size=12)
     pdf.cell(0, 10, f"Building Address: {building_info['buildingName']}", ln=True)
     pdf.cell(0, 10, f"BRF: HSB BRF Sjöresan i Stockholm", ln=True)
-    pdf.cell(0, 10, f"Number of Apartments: Not specified", ln=True)
-    pdf.cell(0, 10, f"Building Year: Not specified", ln=True)
-    pdf.cell(0, 10, f"Atemp (m²): Not specified", ln=True)
+    pdf.cell(0, 10, f"Energy Class: {building_info.get('declaredEnergyClass', 'Not specified')}", ln=True)
+    pdf.cell(0, 10, f"Average Energy Consumption: {building_info.get('EnergyClassKwhM2', 'Not specified')} kWh/m²", ln=True)
     pdf.ln(10)
     
-    # Proposed Measures and Reduction Potential
+    # Monthly Energy Consumption
     pdf.set_font("Arial", "B", 16)
-    pdf.cell(0, 10, "Proposed Measures and Reduction Potential", ln=True)
-    pdf.set_font("Arial", size=12)
-    pdf.cell(60, 10, "Measure", 1)
-    pdf.cell(40, 10, "Energy Savings (%)", 1)
-    pdf.cell(40, 10, "Investment Cost (SEK)", 1)
-    pdf.cell(40, 10, "ROI (years)", 1)
+    pdf.cell(0, 10, f"Monthly Energy Consumption in {year}", ln=True)
     pdf.ln(10)
     
-    measures = [
-        {"measure": "Geothermal Heat Pump", "savings": 15, "cost": 800000, "roi": 7},
-        {"measure": "Solar Panels", "savings": 10, "cost": 500000, "roi": 8},
-        {"measure": "LED Lighting", "savings": 5, "cost": 150000, "roi": 3},
-        {"measure": "Motion Sensors", "savings": 3, "cost": 75000, "roi": 2},
-        {"measure": "EMS", "savings": 5, "cost": 200000, "roi": 4},
-        {"measure": "Boiler Efficiency", "savings": 7, "cost": 300000, "roi": 5},
-        {"measure": "Heat Recovery Systems", "savings": 10, "cost": 400000, "roi": 6}
-    ]
-
-    for measure in measures:
-        pdf.cell(60, 10, measure["measure"], 1)
-        pdf.cell(40, 10, f"{measure['savings']}%", 1)
-        pdf.cell(40, 10, f"{measure['cost']:,}", 1)
-        pdf.cell(40, 10, str(measure["roi"]), 1)  # Convert ROI to string
-        pdf.ln(10)
-
+    if not df.empty:
+        pdf.set_font("Arial", size=12)
+        for index, row in df.iterrows():
+            row_text = f"{row['month']}: Property={row['electricity_use_property']} kWh, Station={row['electricity_use_charging_station']} kWh, Hot Water={row['electricity_use_water_heating_and_tap_hot_water']} kWh"
+            pdf.cell(0, 10, row_text, ln=True)
+    else:
+        pdf.cell(0, 10, f"No consumption data found for the year {year}.", ln=True)
     pdf.ln(10)
     
-    # Graph of Savings and ROI
+    # Graph of Monthly Consumption
     graph_path = generate_energy_usage_graph(building_id, year, show_plot=False)
     if graph_path:
         pdf.image(graph_path, x=10, y=None, w=180)
         pdf.ln(10)
     
-    # Total Reduction Potential
+    # HVAC Systems
     pdf.set_font("Arial", "B", 16)
-    pdf.cell(0, 10, "Total Reduction Potential", ln=True)
+    pdf.cell(0, 10, "HVAC Systems", ln=True)
+    pdf.ln(10)
+    
+    hvac_data = extract_hvac_system_data(building_id)
     pdf.set_font("Arial", size=12)
-    initial_energy_use = 1912231.20
-    total_savings_percentage = sum(m["savings"] for m in measures)
-    reduced_energy_use = initial_energy_use * (1 - total_savings_percentage / 100)
-    annual_savings = initial_energy_use - reduced_energy_use
-    annual_savings_sek = annual_savings * 1.5  # Assuming 1.5 SEK per kWh
-
-    pdf.cell(0, 10, f"Total Energy Use Before Measures: {initial_energy_use:.2f} kWh", ln=True)
-    pdf.cell(0, 10, f"Total Energy Use After Measures: {reduced_energy_use:.2f} kWh", ln=True)
-    pdf.cell(0, 10, f"Annual Energy Savings: {annual_savings:.2f} kWh", ln=True)
-    pdf.cell(0, 10, f"Annual Savings in SEK: {annual_savings_sek:.2f} SEK", ln=True)
-    pdf.cell(0, 10, f"Annual Savings per Apartment: {annual_savings_sek / 100:.2f} SEK", ln=True)
+    if hvac_data:
+        for key, value in hvac_data.items():
+            pdf.cell(0, 10, f"{key}: {value}", ln=True)
+    else:
+        pdf.cell(0, 10, "No HVAC data available.", ln=True)
+    pdf.ln(10)
+    
+    # Electricity Enduses
+    pdf.set_font("Arial", "B", 16)
+    pdf.cell(0, 10, "Electricity Enduses", ln=True)
+    pdf.ln(10)
+    
+    enduses_data = extract_electricity_enduses_data(building_id)
+    pdf.set_font("Arial", size=12)
+    if enduses_data:
+        for key, value in enduses_data.items():
+            pdf.cell(0, 10, f"{key}: {value}", ln=True)
+    else:
+        pdf.cell(0, 10, "No electricity enduses data available.", ln=True)
     pdf.ln(10)
     
     # Conclusion
