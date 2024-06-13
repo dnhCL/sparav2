@@ -28,7 +28,7 @@ instructions = """
 - Wait for the user to provide the year before continuing.
 
 **Step 6: Extraction of Real Data**
-- Use Python to extract data from `meterings.json`, `electricity_enduses.json`, and `hvac_systems.json` for the provided `building_id` and year. Ensure only real data extracted from these files is used.
+- Use code interpreter to extract data from `meterings.json`, `electricity_enduses.json`, and `hvac_systems.json` for the provided `building_id` and year. Ensure only real data extracted from these files is used.
 
 **Step 7: Monthly Electricity Consumption**
 - Display the monthly electricity consumption for the property in a specific format:
