@@ -177,6 +177,7 @@ def generate_recommendations(id):
     return recommendations
 
 # Check if the assistant has identified the building, year, and if report is requested
+#and st.session_state.get("report_requested") to consider report
 if st.session_state.get("selected_building_id") and st.session_state.get("selected_year") :
     building_id = st.session_state["selected_building_id"]
     year = st.session_state["selected_year"]
