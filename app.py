@@ -24,8 +24,6 @@ st.session_state["hvac_systems_data"] = load_json("data/hvac_systems.json")
 st.session_state["id_data"] = load_json("data/id.json")
 st.session_state["buildings"] = st.session_state["id_data"]
 
-
-
 # Function to handle user input and clear input field
 def handle_input():
     if "input" in st.session_state and st.session_state.input.strip():
@@ -43,7 +41,7 @@ with chat_container:
         st.markdown(f"**{role}:** {msg['content']}")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# User input section with button /// Remember: Problem when the message is send using the button.
+# User input section with button
 user_input_col, button_col = st.columns([5, 1])
 with user_input_col:
     st.text_input("Type your message here:", key="input", label_visibility="collapsed", on_change=handle_input)
@@ -137,15 +135,14 @@ if st.session_state.get("selected_building_id") and st.session_state.get("select
     building_info = next(b for b in st.session_state["id_data"] if b["building_id"] == building_id)
 
     st.subheader(f"Energy Consumption for {building_info['buildingName']} in {year}")
-    generate_energy_usage_graph(building_id, year)  # Display the graph in the chat window
-    
-    # Generate and display the report
-    report_path = generate_report(building_id, year)
-    with open(report_path, "rb") as file:
-        btn = st.download_button(
-            label="Download Report",
-            data=file,
-            file_name=os.path.basename(report_path),
-            mime="application/pdf"
-        )
 
+    if st.button("Generate Report"):
+        # Generate and display the report
+        report_path = generate_report(building_id, year)
+        with open(report_path, "rb") as file:
+            btn = st.download_button(
+                label="Download Report",
+                data=file,
+                file_name=os.path.basename(report_path),
+                mime="application/pdf"
+            )
