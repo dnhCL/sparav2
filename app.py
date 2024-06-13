@@ -129,7 +129,7 @@ def generate_report(building_id, year):
     return report_path
 
 # Check if the assistant has identified the building and year
-if st.session_state.get("selected_building_id") and st.session_state.get("selected_year"):
+if st.session_state.get("selected_building_id") and st.session_state.get("selected_year") and st.session_state.get["selected_report"]:
     building_id = st.session_state["selected_building_id"]
     year = st.session_state["selected_year"]
     building_info = next(b for b in st.session_state["id_data"] if b["building_id"] == building_id)

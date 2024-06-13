@@ -84,6 +84,11 @@ def handle_user_input(prompt):
             if year:
                 st.session_state["selected_year"] = year
 
+        if "report" in response.lower():
+            report= extract_year(response)
+            if report:
+                st.session_state["selected_report"] = report        
+
         # Extract meter data using Python /// Remember: It is not working very well this point
         if st.session_state.get("selected_building_id") and st.session_state.get("selected_year"):
             building_id = st.session_state["selected_building_id"]
