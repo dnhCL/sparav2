@@ -9,7 +9,6 @@ import re
 
 # Load environment variables
 load_dotenv()
-# Load environment variables and set up the OpenAI client
 OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 assistant_id = st.secrets["assistant_id"]
 
@@ -84,12 +83,11 @@ def handle_user_input(prompt):
             if year:
                 st.session_state["selected_year"] = year
 
+        # If the assistant identifies a request for a report
         if "report" in response.lower():
-            report= extract_year(response)
-            if report:
-                st.session_state["selected_report"] = report        
+            st.session_state["report_requested"] = True
 
-        # Extract meter data using Python /// Remember: It is not working very well this point
+        # Extract meter data using Python
         if st.session_state.get("selected_building_id") and st.session_state.get("selected_year"):
             building_id = st.session_state["selected_building_id"]
             year = st.session_state["selected_year"]

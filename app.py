@@ -128,21 +128,20 @@ def generate_report(building_id, year):
     
     return report_path
 
-# Check if the assistant has identified the building and year
-if st.session_state.get("selected_building_id") and st.session_state.get("selected_year"):
+# Check if the assistant has identified the building, year, and if report is requested
+if st.session_state.get("selected_building_id") and st.session_state.get("selected_year") and st.session_state.get("report_requested"):
     building_id = st.session_state["selected_building_id"]
     year = st.session_state["selected_year"]
     building_info = next(b for b in st.session_state["id_data"] if b["building_id"] == building_id)
 
     st.subheader(f"Energy Consumption for {building_info['buildingName']} in {year}")
 
-    if st.button("Generate Report"):
-        # Generate and display the report
-        report_path = generate_report(building_id, year)
-        with open(report_path, "rb") as file:
-            btn = st.download_button(
-                label="Download Report",
-                data=file,
-                file_name=os.path.basename(report_path),
-                mime="application/pdf"
-            )
+    # Generate and display the report
+    report_path = generate_report(building_id, year)
+    with open(report_path, "rb") as file:
+        btn = st.download_button(
+            label="Download Report",
+            data=file,
+            file_name=os.path.basename(report_path),
+            mime="application/pdf"
+        )
