@@ -6,51 +6,68 @@ import json
 import os
 from fpdf import FPDF
 
-# Initialize chat session
-initialize_chat()
-
-# Application title
-st.title("Building Energy Assistant")
-
-# Load building data
+# Load building data if not already loaded
 def load_json(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         return json.load(file)
 
-# Load data
-st.session_state["meterings_data"] = load_json("data/meterings.json")
-st.session_state["electricity_enduses_data"] = load_json("data/electricity_enduses.json")
-st.session_state["hvac_systems_data"] = load_json("data/hvac_systems.json")
-st.session_state["id_data"] = load_json("data/id.json")
-st.session_state["buildings"] = st.session_state["id_data"]
+if 'data_loaded' not in st.session_state:
+    print("[App Initialization] Loading all necessary data files...")
+    st.session_state["meterings_data"] = load_json("data/meterings.json")
+    st.session_state["electricity_enduses_data"] = load_json("data/electricity_enduses.json")
+    st.session_state["hvac_systems_data"] = load_json("data/hvac_systems.json")
+    st.session_state["id_data"] = load_json("data/id.json")
+    st.session_state["buildings"] = st.session_state["id_data"]
+    st.session_state['data_loaded'] = True
 
+# Initialize chat session if not already initialized
+if 'chat_initialized' not in st.session_state:
+    print("[App Initialization] Initializing chat session...")
+    initialize_chat()
+    st.session_state['chat_initialized'] = True
+
+# Application title
+if 'app_title_set' not in st.session_state:
+    print("[App Initialization] Setting application title...")
+    st.title("Building Energy Assistant")
+    st.session_state['app_title_set'] = True
 
 # Function to handle user input and clear input field
 def handle_input():
     if "input" in st.session_state and st.session_state.input.strip():
         user_input = st.session_state.input
+        print(f"[Handle Input] Handling user input: {user_input}")
         handle_user_input(user_input)
         st.session_state.input = ""  # Clear input field
+        print("[Handle Input] User input field cleared.")
 
-# Encapsulate the chat area in a container
-st.subheader("Assistant Chat")
-chat_container = st.container()
-with chat_container:
-    st.markdown('<div class="chat-container">', unsafe_allow_html=True)
-    for msg in st.session_state["messages"]:
-        role = "User" if msg["role"] == "user" else "Assistant"
-        st.markdown(f"**{role}:** {msg['content']}")
-    st.markdown('</div>', unsafe_allow_html=True)
+# Encapsulate the chat area in a container if not already done
+if 'chat_container_set' not in st.session_state:
+    print("[App Initialization] Setting up chat container...")
+    st.subheader("Assistant Chat")
+    chat_container = st.container()
+    with chat_container:
+        st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+        for msg in st.session_state["messages"]:
+            role = "User" if msg["role"] == "user" else "Assistant"
+            print(f"[App Initialization] Displaying message: {role}: {msg['content']}")
+            st.markdown(f"**{role}:** {msg['content']}")
+        st.markdown('</div>', unsafe_allow_html=True)
+    st.session_state['chat_container_set'] = True
 
-# User input section with button /// Remember: Problem when the message is send using the button.
-user_input_col, button_col = st.columns([5, 1])
-with user_input_col:
-    st.text_input("Type your message here:", key="input", label_visibility="collapsed", on_change=handle_input)
-with button_col:
-    st.button("Send", on_click=handle_input)
+# User input section with button
+if 'user_input_section_set' not in st.session_state:
+    user_input_col, button_col = st.columns([5, 1])
+    with user_input_col:
+        st.text_input("Type your message here:", key="input", label_visibility="collapsed", on_change=handle_input)
+    with button_col:
+        st.button("Send", on_click=handle_input)
+    print("[App Initialization] User input section set up.")
+    st.session_state['user_input_section_set'] = True
 
 # Function to generate the energy usage graph
 def generate_energy_usage_graph(building_id, show_plot=True):
+    print(f"[Generate Energy Usage Graph] Generating energy usage graph for building ID: {building_id}...")
     year = 2023
     data = st.session_state["meterings_data"].get(str(building_id))
     if data and str(year) in data:
@@ -67,11 +84,14 @@ def generate_energy_usage_graph(building_id, show_plot=True):
         if show_plot:
             st.pyplot(fig)
         plt.close(fig)
+        print(f"[Generate Energy Usage Graph] Graph generated and saved at {graph_path}.")
         return graph_path
+    print("[Generate Energy Usage Graph] No data available to generate graph.")
     return None
 
 # Function to generate a PDF report
 def generate_report(building_id):
+    print(f"[Generate Report] Generating report for building ID: {building_id}...")
     year = 2023
     building_info = next(b for b in st.session_state["id_data"] if b["building_id"] == building_id)
     data = st.session_state["meterings_data"].get(str(building_id))
@@ -128,6 +148,7 @@ def generate_report(building_id):
     # Save the report to a PDF file
     report_path = os.path.join("data", f"building_report_{building_id}_{year}.pdf")
     pdf.output(report_path)
+    print(f"[Generate Report] Report generated and saved at {report_path}.")
     
     return report_path
 
@@ -136,6 +157,7 @@ if st.session_state.get("selected_building_id"):
     building_id = st.session_state["selected_building_id"]
     building_info = next(b for b in st.session_state["id_data"] if b["building_id"] == building_id)
 
+    print(f"[App Initialization] Generating energy consumption details for {building_info['buildingName']} in 2023...")
     st.subheader(f"Energy Consumption for {building_info['buildingName']} in 2023")
     generate_energy_usage_graph(building_id)  # Display the graph in the chat window
     
@@ -148,3 +170,5 @@ if st.session_state.get("selected_building_id"):
             file_name=os.path.basename(report_path),
             mime="application/pdf"
         )
+    print("[App Initialization] Report ready for download.")
+

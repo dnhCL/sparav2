@@ -5,8 +5,11 @@ from assistant_instructions import instructions
 from dotenv import load_dotenv
 # Cargar las variables de entorno
 load_dotenv()
-OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
+#OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
+#assistant_id = st.secrets["assistant_id"]
 
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+assistant_id = os.getenv("assistant_id")
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
