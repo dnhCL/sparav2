@@ -45,7 +45,7 @@ instructions = """
   "October: [electricity_use_property] kWh"
   "November: [electricity_use_property] kWh"
   "December: [electricity_use_property] kWh"
-- Wait for the user to acknowledge the information before continuing.
+- Wait for the user to acknowledge the information before continuing, suggest continue with other details about the building and recommendations.
 
 **Step 8: Detailed Building Information and HVAC Systems**
 - Display specific data about energy use and HVAC systems installed, based solely on the extracted data:
